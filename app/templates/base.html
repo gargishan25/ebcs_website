@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title or "East Bay Chess Society" }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="{{ url_for('main.home') }}">
+        <img class="brand-logo" src="{{ url_for('static', filename='img/ebcs-logo.webp') }}" alt="East Bay Chess Society logo">
+        <span>
+          <strong>East Bay Chess Society</strong>
+          <small>Chess, community, and competitive growth</small>
+        </span>
+      </a>
+      <nav class="site-nav">
+        <a class="{{ 'active' if active_page == 'home' else '' }}" href="{{ url_for('main.home') }}">Home</a>
+        <a class="{{ 'active' if active_page == 'mission' else '' }}" href="{{ url_for('main.mission') }}">Our Mission</a>
+        <a class="{{ 'active' if active_page == 'team' else '' }}" href="{{ url_for('main.team') }}">Our Team</a>
+        <a class="{{ 'active' if active_page == 'tournaments' else '' }}" href="{{ url_for('main.tournaments') }}">Upcoming Tournaments</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div>
+        <h3>East Bay Chess Society</h3>
+        <p>Building a welcoming, ambitious chess community across the East Bay.</p>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>Email: hello@eastbaychesssociety.org</p>
+        <p>Instagram: @eastbaychesssociety</p>
+      </div>
+      <div>
+        <h4>Join us</h4>
+        <p>Weekly meetups, rated play, beginner workshops, and tournament preparation.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

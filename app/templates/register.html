@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% set title = "East Bay Chess Society | Register" %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Registration</p>
+    <h1>Join the tournament and get connected to the East Bay Chess Society.</h1>
+    <p class="lead">
+      Use this page on your flyer so people have a direct place to sign up and find the registration form.
+    </p>
+  </div>
+</section>
+
+<section class="container register-grid">
+  <article class="panel prose">
+    <h2>How to register</h2>
+    <ol>
+      <li>Review the tournament details on the Upcoming Tournaments page.</li>
+      <li>Click the Google Form link below and complete the registration form.</li>
+      <li>Watch for confirmation details and event updates.</li>
+    </ol>
+    <p>
+      If you are printing a flyer, place the direct registration URL or QR code next to this page address so people can
+      sign up quickly from their phone.
+    </p>
+    <a class="button" href="https://forms.gle/REPLACE-WITH-YOUR-GOOGLE-FORM" target="_blank" rel="noopener noreferrer">
+      Open Google Form
+    </a>
+  </article>
+  <article class="panel callout">
+    <h3>Flyer-ready link</h3>
+    <p>Use this page as the public landing page for this tournament registration.</p>
+    <code>{{ request.url_root.rstrip('/') }}{{ url_for('main.inaugural_register') }}</code>
+    <p class="muted">Replace the Google Form URL above with your real form before publishing.</p>
+  </article>
+</section>
+{% endblock %}

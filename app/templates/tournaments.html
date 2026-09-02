@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set title = "East Bay Chess Society | Upcoming Tournaments" %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <p class="eyebrow">Upcoming Tournaments</p>
+    <h1>Clear, exciting event information for players, families, and flyer visitors.</h1>
+    <p class="lead">
+      We keep our tournament pages easy to understand so people can quickly decide how to participate and where to register.
+    </p>
+  </div>
+</section>
+
+<section class="container schedule-grid">
+  <article class="event panel">
+    <div class="event-meta">Featured Event</div>
+    <h2>Inaugural East Bay Chess Society Tournament</h2>
+    <p><strong>Date:</strong> To be announced</p>
+    <p><strong>Location:</strong> East Bay venue to be confirmed</p>
+    <p><strong>Format:</strong> Multiple sections, timed rounds, and organized pairings</p>
+    <p>
+      This event is intended to launch the organization with a polished, inclusive tournament experience. Participants
+      can expect a well-managed check-in process, clear announcements, and a competitive but welcoming environment.
+    </p>
+    <div class="event-actions">
+      <a class="button" href="{{ url_for('main.inaugural_register') }}">Register for this tournament</a>
+      <span class="muted">Registration is connected directly to this event.</span>
+    </div>
+  </article>
+  <article class="panel prose">
+    <h3>What players should expect</h3>
+    <ul>
+      <li>Simple online registration through the website</li>
+      <li>Player updates before and during the event</li>
+      <li>A friendly setting for both first-time and experienced competitors</li>
+      <li>Potential sections for different age or rating groups</li>
+    </ul>
+  </article>
+</section>
+{% endblock %}
