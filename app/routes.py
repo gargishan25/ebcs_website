@@ -17,8 +17,3 @@ def team():
 @main.route("/tournaments")
 def tournaments():
     return render_template("tournaments.html", active_page="tournaments")
-
-
-@main.route("/tournaments/inaugural/register")
-def inaugural_register():
-    return render_template("register.html", active_page="tournaments")
