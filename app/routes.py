@@ -9,11 +9,6 @@ def home():
     return render_template("home.html", active_page="home")
 
 
-@main.route("/mission")
-def mission():
-    return render_template("mission.html", active_page="mission")
-
-
 @main.route("/team")
 def team():
     return render_template("team.html", active_page="team")
