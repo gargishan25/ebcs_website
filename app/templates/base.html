@@ -20,8 +20,8 @@
       </a>
       <nav class="site-nav">
         <a class="{{ 'active' if active_page == 'home' else '' }}" href="{{ url_for('main.home') }}">Home</a>
-        <a class="{{ 'active' if active_page == 'team' else '' }}" href="{{ url_for('main.team') }}">Our Team</a>
-        <a class="{{ 'active' if active_page == 'tournaments' else '' }}" href="{{ url_for('main.tournaments') }}">Upcoming Tournaments</a>
+        <a class="{{ 'active' if active_page == 'team' else '' }}" href="{{ url_for('main.team') }}">Team</a>
+        <a class="{{ 'active' if active_page == 'tournaments' else '' }}" href="{{ url_for('main.tournaments') }}">Events</a>
       </nav>
     </div>
   </header>
@@ -34,7 +34,7 @@
     <div class="container footer-grid">
       <div>
         <h3>East Bay Chess Society</h3>
-        <p>Building a welcoming, ambitious chess community across the East Bay.</p>
+        <p>Building a welcoming chess community across the East Bay.</p>
       </div>
       <div>
         <h4>Contact</h4>
@@ -43,7 +43,7 @@
       </div>
       <div>
         <h4>Join us</h4>
-        <p>Weekly meetups, rated play, beginner workshops, and tournament preparation.</p>
+        <p>Weekly meetups and rated play.</p>
       </div>
     </div>
   </footer>

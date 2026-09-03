@@ -9,11 +9,11 @@ def home():
     return render_template("home.html", active_page="home")
 
 
-@main.route("/team")
+@main.route("/team/")
 def team():
     return render_template("team.html", active_page="team")
 
 
-@main.route("/tournaments")
+@main.route("/events/")
 def tournaments():
     return render_template("tournaments.html", active_page="tournaments")
