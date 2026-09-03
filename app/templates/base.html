@@ -20,7 +20,6 @@
       </a>
       <nav class="site-nav">
         <a class="{{ 'active' if active_page == 'home' else '' }}" href="{{ url_for('main.home') }}">Home</a>
-        <a class="{{ 'active' if active_page == 'mission' else '' }}" href="{{ url_for('main.mission') }}">Our Mission</a>
         <a class="{{ 'active' if active_page == 'team' else '' }}" href="{{ url_for('main.team') }}">Our Team</a>
         <a class="{{ 'active' if active_page == 'tournaments' else '' }}" href="{{ url_for('main.tournaments') }}">Upcoming Tournaments</a>
       </nav>
