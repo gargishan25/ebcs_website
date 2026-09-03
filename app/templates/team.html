@@ -1,6 +1,28 @@
 {% extends "base.html" %}
 {% set title = "East Bay Chess Society | Our Team" %}
 {% block content %}
+<style>
+  /* --- Team photo styles ---
+       If you have a main stylesheet, feel free to move this block there instead. */
+  .team-photo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    margin: 0 auto 1rem auto;
+    background: #e5e5e5; /* shows as a gray circle until an image is added */
+    border: 1px solid #ccc;
+  }
+  .team-name {
+    text-align: center;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+  }
+  .team-card h3 {
+    text-align: center;
+  }
+</style>
 <section class="page-hero">
   <div class="container">
     <p class="eyebrow">Our Team</p>
@@ -14,18 +36,28 @@
 
 <section class="container team-grid">
   <article class="panel team-card">
+    <!-- To add a photo: replace the src below with your image path, e.g. /static/img/team/jane.jpg -->
+    <img class="team-photo" src="" alt="Founding Director photo">
+    <!-- To add a name: replace the text below -->
+    <p class="team-name">Full Name</p>
     <h3>Founding Director</h3>
     <p>Oversees vision, partnerships, and tournament standards while keeping the club rooted in community values.</p>
   </article>
   <article class="panel team-card">
+    <img class="team-photo" src="" alt="Tournament Coordinator photo">
+    <p class="team-name">Full Name</p>
     <h3>Tournament Coordinator</h3>
     <p>Manages event flow, player registration, pairings, and the on-site details that keep the day running smoothly.</p>
   </article>
   <article class="panel team-card">
+    <img class="team-photo" src="" alt="Community Outreach Lead photo">
+    <p class="team-name">Full Name</p>
     <h3>Community Outreach Lead</h3>
     <p>Builds relationships with schools, local businesses, and public-facing partners to expand participation.</p>
   </article>
   <article class="panel team-card">
+    <img class="team-photo" src="" alt="Instruction & Youth Support photo">
+    <p class="team-name">Full Name</p>
     <h3>Instruction & Youth Support</h3>
     <p>Helps new players learn the basics, prepares students for competition, and supports family-friendly programming.</p>
   </article>
