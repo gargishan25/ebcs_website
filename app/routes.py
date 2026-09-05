@@ -17,3 +17,8 @@ def team():
 @main.route("/events/")
 def tournaments():
     return render_template("tournaments.html", active_page="tournaments")
+
+
+@main.route("/2026r&b/")
+def event_details():
+    return render_template("event_details.html", active_page="tournaments")
