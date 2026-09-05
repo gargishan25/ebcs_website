@@ -1,6 +1,43 @@
 {% extends "base.html" %}
 {% set title = "East Bay Chess Society | 2026 Rapid & Blitz Details" %}
 {% block content %}
+<style>
+  /* --- Event details layout ---
+       If you have a main stylesheet, feel free to move this block there instead. */
+  .event-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .event-detail-grid .panel {
+    margin: 0;
+  }
+  .event-detail-grid .panel.full-width {
+    grid-column: 1 / -1;
+  }
+  .event-detail-grid h3 {
+    margin-top: 0;
+  }
+  .schedule-pair {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .schedule-pair > div {
+    flex: 1;
+    min-width: 200px;
+  }
+  .event-detail-grid .register-panel {
+    text-align: center;
+  }
+  @media (max-width: 700px) {
+    .event-detail-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
 <section class="page-hero">
   <div class="container">
     <p class="eyebrow">Event Details</p>
@@ -8,65 +45,80 @@
   </div>
 </section>
 
-<section class="container schedule-grid">
-  <article class="event panel">
+<section class="container event-detail-grid">
+
+  <article class="panel">
+    <h3>Overview</h3>
     <p><strong>Date:</strong> October 3, 2026</p>
     <p><strong>Location:</strong> Centerville Community Center: 3355 Country Dr, Fremont CA, 94536.</p>
     <p><strong>Registration closes:</strong> September 26, 2026 (no exceptions)</p>
     <p><strong>Sections:</strong> u800, 800-1399, 1400-1799, 1800+ - based on regular rating for both Blitz and Rapid.</p>
     <p><strong>Capacity:</strong> u800 - 40 players, 800-1399 - 40 players, 1400-1799 - 30 players, 1800+ - 30 players.</p>
-    <p><strong>Time controls:</strong> Rapid 10+5 (5 rounds), Blitz 3+2 (6 rounds).</p>
+  </article>
 
-    <h3>Rapid Schedule</h3>
-    <table class="schedule-table">
-      <thead>
-        <tr>
-          <th>Round</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>1</td><td>1:30 PM</td></tr>
-        <tr><td>2</td><td>2:10 PM</td></tr>
-        <tr><td>3</td><td>2:50 PM</td></tr>
-        <tr><td>4</td><td>3:30 PM</td></tr>
-      </tbody>
-    </table>
-
-    <h3>Blitz Schedule</h3>
-    <table class="schedule-table">
-      <thead>
-        <tr>
-          <th>Round</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>1</td><td>4:15 PM</td></tr>
-        <tr><td>2</td><td>4:30 PM</td></tr>
-        <tr><td>3</td><td>4:45 PM</td></tr>
-        <tr><td>4</td><td>5:00 PM</td></tr>
-        <tr><td>5</td><td>5:15 PM</td></tr>
-        <tr><td>6</td><td>5:30 PM</td></tr>
-      </tbody>
-    </table>
-
+  <article class="panel">
+    <h3>Cost & Requirements</h3>
     <p><strong>Cost:</strong> $5 for Rapid, $5 for Blitz, or $5 for both.</p>
     <p><strong>Requirements:</strong> Active USCF membership (please make sure it isn't expired).</p>
     <p><strong>Rules:</strong> Half-point byes must be requested before the first round begins. To request a play-up, email
       <a href="mailto:eastbaychesssociety@gmail.com">eastbaychesssociety@gmail.com</a> if you're within 100 points of the cutoff for the next section.
     </p>
-    <p><strong>Awards:</strong></p>
+  </article>
+
+  <article class="panel full-width">
+    <h3>Schedule</h3>
+    <p><strong>Time controls:</strong> Rapid 10+5 (5 rounds), Blitz 3+2 (6 rounds).</p>
+    <div class="schedule-pair">
+      <div>
+        <h4>Rapid</h4>
+        <table class="schedule-table">
+          <thead>
+            <tr><th>Round</th><th>Time</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>1:30 PM</td></tr>
+            <tr><td>2</td><td>2:10 PM</td></tr>
+            <tr><td>3</td><td>2:50 PM</td></tr>
+            <tr><td>4</td><td>3:30 PM</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h4>Blitz</h4>
+        <table class="schedule-table">
+          <thead>
+            <tr><th>Round</th><th>Time</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>4:15 PM</td></tr>
+            <tr><td>2</td><td>4:30 PM</td></tr>
+            <tr><td>3</td><td>4:45 PM</td></tr>
+            <tr><td>4</td><td>5:00 PM</td></tr>
+            <tr><td>5</td><td>5:15 PM</td></tr>
+            <tr><td>6</td><td>5:30 PM</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h3>Awards</h3>
     <ul>
       <li>1st place (1800+ and 1400-1799 sections): Trophy</li>
       <li>2nd place (800-1399 and u800 sections): Trophy</li>
     </ul>
+  </article>
+
+  <article class="panel">
+    <h3>Organizers</h3>
     <p><strong>Tournament Director:</strong> Coach Demetrius Goins</p>
     <p><strong>Main Organizers:</strong> Jai Yadav & Ishan Garg</p>
-
-    <div class="event-actions">
-      <a class="button" href="https://forms.gle/djW56kmm3ikMxSvF8" target="_blank" rel="noopener">Register</a>
-    </div>
   </article>
+
+  <article class="panel full-width register-panel">
+    <a class="button" href="https://forms.gle/djW56kmm3ikMxSvF8" target="_blank" rel="noopener">Register</a>
+  </article>
+
 </section>
 {% endblock %}
