@@ -4,38 +4,67 @@
 <style>
   /* --- Event details layout ---
        If you have a main stylesheet, feel free to move this block there instead. */
+  .featured-banner {
+    padding: 2rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
   .event-detail-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1.1rem;
     max-width: 1000px;
     margin: 0 auto;
+    padding-bottom: 2.5rem;
   }
   .event-detail-grid .panel {
     margin: 0;
-    font-size: 0.92rem;
+    padding: 1.15rem 1.35rem;
+    font-size: 0.9rem;
   }
   .event-detail-grid .panel.full-width {
     grid-column: 1 / -1;
   }
+  .event-detail-grid p {
+    margin: 0.4rem 0;
+  }
+  .event-detail-grid ul {
+    margin: 0.4rem 0;
+    padding-left: 1.2rem;
+  }
+  .event-detail-grid li {
+    margin-bottom: 0.2rem;
+  }
   .event-detail-grid h3 {
-    margin-top: 0;
+    margin: 0 0 0.6rem;
     font-size: 1.05rem;
   }
   .event-detail-grid h4 {
-    font-size: 0.95rem;
-    margin-bottom: 0.4rem;
+    font-size: 0.92rem;
+    margin: 0 0 0.35rem;
   }
   .schedule-pair {
     display: flex;
-    gap: 2rem;
+    gap: 1.75rem;
     flex-wrap: wrap;
   }
   .schedule-pair > div {
     flex: 1;
-    min-width: 200px;
+    min-width: 180px;
+  }
+  .schedule-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.88rem;
+  }
+  .schedule-table th, .schedule-table td {
+    padding: 0.3rem 0.6rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border, #ddd);
   }
   .event-detail-grid .register-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
   }
   @media (max-width: 700px) {
@@ -110,14 +139,14 @@
     </div>
   </article>
 
-  <article class="panel full-width">
+  <article class="panel">
     <h3>Awards</h3>
     <ul>
       <li>1st place (1500+, 1000-1499, and u1000 sections): Trophy</li>
     </ul>
   </article>
 
-  <article class="panel full-width register-panel">
+  <article class="panel register-panel">
     <a class="button" href="https://forms.gle/djW56kmm3ikMxSvF8" target="_blank" rel="noopener">Register</a>
   </article>
 
