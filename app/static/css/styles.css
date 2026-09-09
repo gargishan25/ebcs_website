@@ -124,3 +124,49 @@ h3 { font-size: 1.7rem; margin-bottom: 0.6rem; }
 /* Blue banner used to mark a featured event's details page */
 .featured-banner { padding: 3rem 2rem; text-align: center; margin-bottom: 2rem; }
 .featured-banner .card-label { justify-content: center; width: 100%; }
+
+/* Coaching nav link styled as a standout pill/CTA, pinned at the end of the nav */
+.site-nav .nav-cta {
+  background: linear-gradient(135deg, var(--accent), #0f3d7a);
+  color: #fff;
+  padding: 0.6rem 1.15rem;
+  border-radius: 999px;
+  font-weight: 700;
+  margin-left: 0.5rem;
+  box-shadow: 0 8px 20px rgba(15, 61, 122, 0.35);
+  transition: transform 0.15s ease;
+}
+.site-nav .nav-cta:hover {
+  background: linear-gradient(135deg, #1857a6, #0c2c5b);
+  transform: translateY(-1px);
+}
+.site-nav .nav-cta.active {
+  background: linear-gradient(135deg, #0f3d7a, #0c2c5b);
+}
+
+.form-section { max-width: 640px; margin: 0 auto; padding-bottom: 4rem; }
+.form-field { margin-bottom: 1.1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.form-field label { font-weight: 600; font-size: 0.92rem; }
+.form-field input, .form-field textarea, .form-field select {
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.8rem;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+}
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.flash { padding: 0.75rem 1rem; border-radius: 0.8rem; margin-bottom: 1rem; font-size: 0.92rem; }
+.flash-success { background: rgba(24, 87, 166, 0.1); color: var(--accent); }
+.flash-error { background: rgba(200, 60, 60, 0.1); color: #a83232; }
+.coaching-landing { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; padding-bottom: 4rem; }
+.admin-grid { display: grid; gap: 1.5rem; padding-bottom: 4rem; }
+.admin-grid table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.admin-grid th, .admin-grid td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); text-align: left; }
+@media (max-width: 700px) {
+  .coaching-landing { grid-template-columns: 1fr; }
+}
