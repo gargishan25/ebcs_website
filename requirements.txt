@@ -1,2 +1,7 @@
 Flask>=3.0,<4.0
 gunicorn
+Flask-SQLAlchemy>=3.1,<4.0
+Flask-Login>=0.6,<0.7
+Flask-WTF>=1.2,<2.0
+email-validator>=2.0
+psycopg2-binary>=2.9,<3.0
