@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% set title = "East Bay Chess Society | Coaching Program" %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div class="hero-card featured-banner">
+      <div class="card-label">Coaching Program</div>
+      <h1>Get Matched with a Coach</h1>
+    </div>
+  </div>
+</section>
+
+<section class="container coaching-landing">
+  <article class="panel">
+    <h3>Students</h3>
+    <p>Sign up to get matched with a chess coach based on your goals and availability.</p>
+    <div class="event-actions">
+      <a class="button" href="{{ url_for('main.student_register') }}">Sign Up</a>
+      <a class="button button-secondary" href="{{ url_for('main.student_login') }}">Log In</a>
+    </div>
+  </article>
+  <article class="panel">
+    <h3>Coaches</h3>
+    <p>Interested in coaching with us? Tell us about your experience and availability.</p>
+    <div class="event-actions">
+      <a class="button" href="{{ url_for('main.coach_apply') }}">Apply to Coach</a>
+    </div>
+  </article>
+</section>
+{% endblock %}
