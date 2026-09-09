@@ -22,6 +22,10 @@
         <a class="{{ 'active' if active_page == 'home' else '' }}" href="{{ url_for('main.home') }}">Home</a>
         <a class="{{ 'active' if active_page == 'team' else '' }}" href="{{ url_for('main.team') }}">Team</a>
         <a class="{{ 'active' if active_page == 'tournaments' else '' }}" href="{{ url_for('main.tournaments') }}">Events</a>
+        <a class="{{ 'active' if active_page == 'sponsors' else '' }}" href="{{ url_for('main.sponsors') }}">Sponsors</a>
+        {% if coaching_enabled %}
+          <a class="{{ 'active' if active_page == 'coaching' else '' }}" href="{{ url_for('main.coaching_home') }}">Coaching</a>
+        {% endif %}
       </nav>
     </div>
   </header>
