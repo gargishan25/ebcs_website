@@ -61,7 +61,7 @@ def coach_apply():
     return render_template("coach_apply.html", active_page="coaching", form=form)
 
 
-@main.route("/coaching/register", methods=["GET", "POST"])
+@main.route("/student/register", methods=["GET", "POST"])
 def student_register():
     _require_coaching_enabled()
     form = StudentRegisterForm()
@@ -83,7 +83,7 @@ def student_register():
     return render_template("student_register.html", active_page="coaching", form=form)
 
 
-@main.route("/coaching/login", methods=["GET", "POST"])
+@main.route("/student/login", methods=["GET", "POST"])
 def student_login():
     _require_coaching_enabled()
     form = StudentLoginForm()
