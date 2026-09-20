@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set title = "East Bay Chess Society | My Dashboard" %}
+{% block content %}
+<section class="page-hero">
+  <div class="container">
+    <div class="hero-card featured-banner">
+      <div class="card-label">Coaching Program</div>
+      <h1>Welcome, {{ current_user.name }}</h1>
+    </div>
+  </div>
+</section>
+
+<section class="container form-section">
+  <article class="panel form-panel">
+    {% if coach %}
+      <h3>You've been matched!</h3>
+      <p><strong>Coach:</strong> {{ coach.name }}</p>
+      <p><strong>Contact:</strong> <a href="mailto:{{ coach.email }}">{{ coach.email }}</a></p>
+      <p>We'll be in touch to help set up your first session. Feel free to reach out to your coach directly in the meantime.</p>
+    {% else %}
+      <h3>We're finding you a coach</h3>
+      <p>Thanks for signing up! We're currently matching students with available coaches. You'll see your coach's information here as soon as a match is made.</p>
+    {% endif %}
+    <a class="button button-secondary" href="{{ url_for('main.student_logout') }}">Log Out</a>
+  </article>
+</section>
+{% endblock %}
