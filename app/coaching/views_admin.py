@@ -14,6 +14,7 @@ from .forms import CoachReviewForm
 from .matching import WEIGHTS, rank
 from .models import (CoachProfile, Event, HourEntry, LearnerProfile, Message, Pairing, Session as CSession,
                      User, log_event)
+from .accounts import send_match_emails, set_active, unverified_ids
 from .util import bars_svg, local_to_utc, roles_required
 from .views_app import _week_start_local
 
@@ -25,9 +26,11 @@ admin_only = roles_required("admin")
 def admin_overview():
     now = datetime.utcnow()
     month_ago = now - timedelta(days=30)
-    waiting = LearnerProfile.query.filter_by(status="waiting").order_by(LearnerProfile.created_at).all()
-    applicants = (CoachProfile.query.filter(CoachProfile.status.in_(["applied", "screening"]))
-                  .order_by(CoachProfile.created_at).all())
+    uv = unverified_ids()  # people who never confirmed their email are hidden everywhere
+    waiting = [l for l in LearnerProfile.query.filter_by(status="waiting").order_by(LearnerProfile.created_at).all()
+               if l.user_id not in uv]
+    applicants = [c for c in CoachProfile.query.filter(CoachProfile.status.in_(["applied", "screening"]))
+                  .order_by(CoachProfile.created_at).all() if c.user_id not in uv]
     pending_hours = HourEntry.query.filter_by(status="pending").count()
     flagged = Message.query.filter_by(flagged=True).count()
 
@@ -75,7 +78,8 @@ def admin_overview():
 @bp.route("/app/admin/coaches")
 @admin_only
 def admin_coaches():
-    coaches = CoachProfile.query.order_by(CoachProfile.created_at.desc()).all()
+    uv = unverified_ids()
+    coaches = [c for c in CoachProfile.query.order_by(CoachProfile.created_at.desc()).all() if c.user_id not in uv]
     columns = {k: [] for k, _ in COACH_STATUSES}
     for c in coaches:
         columns.setdefault(c.status, []).append(c)
@@ -129,10 +133,14 @@ def admin_learners():
     q = LearnerProfile.query
     if tab in ("waiting", "matched", "paused", "graduated"):
         q = q.filter_by(status=tab)
-    learners = q.order_by(LearnerProfile.created_at).all()
-    counts = Counter(s for (s,) in db.session.query(LearnerProfile.status).all())
+    uv = unverified_ids()
+    learners = [l for l in q.order_by(LearnerProfile.created_at).all() if l.user_id not in uv]
+    counts = Counter(st for (st, uid) in db.session.query(LearnerProfile.status, LearnerProfile.user_id).all()
+                     if uid not in uv)
     demand = Counter()
     for l in LearnerProfile.query.filter_by(status="waiting").all():
+        if l.user_id in uv:
+            continue
         for g in l.goals or []:
             demand[g] += 1
     return render_template("coaching/admin_learners.html", learners=learners, tab=tab, counts=counts,
@@ -146,7 +154,7 @@ def admin_match(user_id):
     learner = learner_user.learner or abort(404)
     if request.method == "POST":
         coach_user = db.session.get(User, request.form.get("coach_id", type=int)) or abort(400)
-        if not coach_user.coach:
+        if not coach_user.coach or coach_user.disabled or learner_user.disabled:
             abort(400)
         if learner.active_pairing():
             flash("This learner already has an active coach.", "error")
@@ -168,10 +176,13 @@ def admin_match(user_id):
         db.session.add(Message(pairing=pairing, sender_id=current_user.id, body=intro))
         log_event(current_user, "matched", f"{learner_user.name} with {coach_user.name}")
         db.session.commit()
+        send_match_emails(pairing)
         flash(f"Matched {learner_user.name} with {coach_user.name}.", "success")
         return redirect(url_for("coaching.admin_learners"))
 
-    coaches = CoachProfile.query.filter(CoachProfile.status.in_(["approved", "paused"])).all()
+    uv = unverified_ids()
+    coaches = [c for c in CoachProfile.query.filter(CoachProfile.status.in_(["approved", "paused"])).all()
+               if not c.user.disabled and c.user_id not in uv]
     eligible, ineligible = rank(coaches, learner)
     history = sorted(learner_user.learner_pairings, key=lambda p: p.created_at, reverse=True)
     return render_template("coaching/admin_match.html", learner_user=learner_user, learner=learner,
@@ -250,3 +261,14 @@ def admin_activity():
     page = request.args.get("page", 1, type=int)
     events = Event.query.order_by(Event.created_at.desc()).paginate(page=page, per_page=50, error_out=False)
     return render_template("coaching/admin_activity.html", events=events)
+
+
+# ------------------------------------------------------------ deactivation ---
+@bp.route("/app/admin/users/<int:user_id>/active", methods=["POST"])
+@admin_only
+def admin_set_active(user_id):
+    user = db.session.get(User, user_id) or abort(404)
+    if user.id == current_user.id or user.is_admin:
+        abort(400)  # admins can't lock themselves (or each other) out from here
+    set_active(user, request.form.get("action") == "reactivate", current_user)
+    return redirect(request.referrer or url_for("coaching.admin_overview"))

@@ -10,7 +10,7 @@
     <div class="lane-h">{{ ui.status_pill("coach", key) }}<span class="n">{{ columns[key]|length }}</span></div>
     {% for c in columns[key] %}
       <a class="ticket" href="{{ url_for('coaching.admin_coach', user_id=c.user_id) }}">
-        <div class="row-between"><b>{{ c.user.name }}</b><span class="num small">{{ c.rating or "-" }}</span></div>
+        <div class="row-between"><b>{{ c.user.name }}</b>{% if c.user.disabled %}<span class="pill pill-red">Deactivated</span>{% endif %}<span class="num small">{{ c.rating or "-" }}</span></div>
         <div class="sub">{{ c.school }} · {{ c.grade }}th</div>
         <div class="tags" style="margin-top:6px">{% for s in c.specialties[:3] %}<span class="tag">{{ cat.FOCUS_LABELS[s] }}</span>{% endfor %}</div>
         <div class="tiny faint" style="margin-top:6px">{{ "Applied " ~ (c.created_at|rel) if key in ["applied", "screening"] else (c.load ~ "/" ~ c.max_learners ~ " learners") }}</div>

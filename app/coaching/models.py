@@ -384,6 +384,33 @@ class HourEntry(db.Model):
     session = db.relationship("Session")
 
 
+# ------------------------------------------------------- account security ---
+class EmailVerification(db.Model):
+    """One row per account that must confirm its email. Accounts with no row
+    (created before verification existed, admins, demo data) count as
+    verified. A separate table means no ALTER on existing tables."""
+
+    __tablename__ = "cp_email_verify"
+
+    user_id = db.Column(db.Integer, db.ForeignKey("cp_user.id"), primary_key=True)
+    code_hash = db.Column(db.String(255))
+    expires_at = db.Column(db.DateTime)
+    attempts = db.Column(db.Integer, default=0)
+    last_sent_at = db.Column(db.DateTime)
+    verified_at = db.Column(db.DateTime)
+
+
+class PasswordReset(db.Model):
+    __tablename__ = "cp_password_reset"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("cp_user.id"), nullable=False, index=True)
+    token_hash = db.Column(db.String(64), unique=True, nullable=False)  # sha256 of the emailed token
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=_now)
+
+
 # ---------------------------------------------------------------- audit ---
 class Event(db.Model):
     """Append-only activity log. Powers the admin feed and safety review."""

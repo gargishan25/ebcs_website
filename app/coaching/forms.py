@@ -184,3 +184,19 @@ class CoachReviewForm(FlaskForm):
     max_learners = SelectField("Roster size", choices=[(str(i), str(i)) for i in range(0, 6)])
     admin_notes = TextAreaField("Internal notes", validators=[Optional(), Length(max=4000)])
     submit = SubmitField("Save review")
+
+
+class VerifyForm(FlaskForm):
+    code = StringField("Code", validators=[DataRequired(), Length(min=6, max=6)])
+    submit = SubmitField("Verify")
+
+
+class ForgotForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Send reset link")
+
+
+class ResetForm(FlaskForm):
+    password = PasswordField("New password", validators=[DataRequired(), Length(min=8, message="At least 8 characters.")])
+    confirm = PasswordField("Confirm password", validators=[DataRequired(), EqualTo("password", "Passwords must match.")])
+    submit = SubmitField("Save password")

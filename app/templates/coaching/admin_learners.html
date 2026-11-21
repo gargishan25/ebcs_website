@@ -29,7 +29,7 @@
     {% for l in learners %}
       {% set p = l.active_pairing() %}
       <tr>
-        <td><div class="who">{{ ui.avatar(l.user) }}<div><b>{{ l.user.name }}</b><small>{{ l.user.email }}</small></div></div></td>
+        <td><div class="who">{{ ui.avatar(l.user) }}<div><b>{{ l.user.name }}{% if l.user.disabled %} <span class="pill pill-red">Deactivated</span>{% endif %}</b><small>{{ l.user.email }}</small></div></div></td>
         <td class="small">{{ cat.AGE_LABELS.get(l.age_band) }}{% if l.is_minor and not l.guardian_consent_at %} <span class="pill pill-red">no consent</span>{% endif %}</td>
         <td class="small">{{ cat.LEVEL_LABELS.get(l.level, "").split(" - ")[0] }}{% if l.rating %} <span class="num faint">{{ l.rating }}</span>{% endif %}</td>
         <td><div class="tags">{% for g in l.goals[:3] %}<span class="tag">{{ cat.FOCUS_LABELS[g] }}</span>{% endfor %}</div></td>

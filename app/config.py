@@ -35,6 +35,14 @@ class Config:
     COACHING_ENABLED = True
     COACHING_TZ = "America/Los_Angeles"
 
+    # Email (Brevo HTTP API - Render's free plan blocks SMTP). Set these on
+    # Render. Without them, emails are printed to the terminal instead.
+    BREVO_API_KEY = os.environ.get("BREVO_API_KEY")
+    MAIL_FROM = os.environ.get("MAIL_FROM")  # must be a sender verified in Brevo
+    MAIL_FROM_NAME = os.environ.get("MAIL_FROM_NAME", "EBCS Coaching")
+    SITE_URL = os.environ.get("SITE_URL")  # e.g. https://ebcs.onrender.com, used for links in emails
+    ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")  # receives "new sign-up" emails
+
     REMEMBER_COOKIE_DURATION = timedelta(days=30)
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = os.environ.get("RENDER") is not None  # https only on Render

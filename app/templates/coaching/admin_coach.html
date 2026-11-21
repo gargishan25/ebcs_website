@@ -8,7 +8,7 @@
   <div class="row" style="gap:14px">
     {{ ui.avatar(user, "avatar-xl") }}
     <div><h1>{{ user.name }}</h1>
-      <div class="sub">{{ profile.school }} · {{ profile.grade }}th grade · {{ ui.status_pill("coach", profile.status) }} · applied {{ profile.created_at|dt("date") }}</div></div>
+      <div class="sub">{{ profile.school }} · {{ profile.grade }}th grade · {{ ui.status_pill("coach", profile.status) }}{% if user.disabled %} <span class="pill pill-red">Deactivated</span>{% endif %} · applied {{ profile.created_at|dt("date") }}</div></div>
   </div>
   <div class="actions"><a class="btn" href="{{ url_for('coaching.hours_statement', coach=user.id) }}">{{ ui.icon("printer") }} Hours summary</a></div>
 </div>
@@ -79,6 +79,20 @@
       </div>
       <div class="card-f"><button class="btn btn-primary" type="submit">Save review</button></div>
     </form>
+    {% if not user.is_admin %}
+    <form class="card" method="POST" action="{{ url_for('coaching.admin_set_active', user_id=user.id) }}"
+          {% if not user.disabled %}data-confirm="Deactivate {{ user.name }}? They won't be able to sign in. You can reactivate them later."{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="{{ 'reactivate' if user.disabled else 'deactivate' }}">
+      <div class="card-b">
+        {% if user.disabled %}
+          <button class="btn btn-sm" type="submit">Reactivate account</button>
+        {% else %}
+          <button class="btn btn-sm btn-danger" type="submit">Deactivate account</button>
+        {% endif %}
+      </div>
+    </form>
+    {% endif %}
     <div class="card">
       <div class="card-h"><h2>Availability</h2><span class="aside small muted">{{ profile.availability|length }} h / week</span></div>
       <div class="card-b">{{ ui.avail_grid("x", profile.availability, editable=False) }}</div>

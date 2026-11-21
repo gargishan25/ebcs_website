@@ -22,12 +22,30 @@ bp = Blueprint("coaching", __name__, url_prefix="/coaching")
 _GATED = {"coaching.landing", "coaching.join_learner", "coaching.join_coach", "coaching.guidelines"}
 
 
+# Pages an unverified (or signed-out) person may still reach.
+_OPEN_WHEN_UNVERIFIED = {"coaching.verify", "coaching.verify_resend", "coaching.logout", "coaching.login",
+                         "coaching.forgot_password", "coaching.reset_password", "coaching.guidelines",
+                         "coaching.landing"}
+
+
 @bp.before_request
 def _gate_and_touch():
     if not current_app.config.get("COACHING_ENABLED") and request.endpoint in _GATED:
         abort(404)
     if current_user.is_authenticated:
+        from flask import flash, redirect, url_for
+        from flask_login import logout_user
+
         from ..models import db
+        from .accounts import is_verified
+
+        if current_user.disabled:
+            logout_user()
+            flash("This account has been deactivated. Contact eastbaychesssociety@gmail.com "
+                  "if you think this is a mistake.", "error")
+            return redirect(url_for("coaching.login"))
+        if request.endpoint not in _OPEN_WHEN_UNVERIFIED and not is_verified(current_user):
+            return redirect(url_for("coaching.verify"))
 
         now = datetime.utcnow()
         if not current_user.last_seen_at or now - current_user.last_seen_at > timedelta(minutes=5):
@@ -84,9 +102,13 @@ def _shell_context():
                                       Message.read_at.is_(None)).count()
     ctx["unread_count"] = unread
     if current_user.is_admin:
+        from .accounts import unverified_ids
+
+        uv = unverified_ids()
         ctx["admin_counts"] = {
-            "applicants": CoachProfile.query.filter(CoachProfile.status.in_(["applied", "screening"])).count(),
-            "waiting": LearnerProfile.query.filter_by(status="waiting").count(),
+            "applicants": sum(1 for c in CoachProfile.query.filter(CoachProfile.status.in_(["applied", "screening"])).all()
+                              if c.user_id not in uv),
+            "waiting": sum(1 for l in LearnerProfile.query.filter_by(status="waiting").all() if l.user_id not in uv),
             "hours": HourEntry.query.filter_by(status="pending").count(),
             "flagged": Message.query.filter_by(flagged=True).count(),
         }

@@ -9,7 +9,7 @@
     {{ ui.avatar(learner, "avatar-xl") }}
     <div>
       <h1>{{ learner.name }}</h1>
-      <div class="sub">{{ cat.AGE_LABELS.get(profile.age_band, "") }} · {{ cat.LEVEL_LABELS.get(profile.level, "").split(" - ")[0] }} · {{ "Rated " ~ profile.rating if profile.rating else "Unrated (est. " ~ profile.rating_estimate ~ ")" }} · {{ ui.status_pill("learner", profile.status) }}</div>
+      <div class="sub">{{ cat.AGE_LABELS.get(profile.age_band, "") }} · {{ cat.LEVEL_LABELS.get(profile.level, "").split(" - ")[0] }} · {{ "Rated " ~ profile.rating if profile.rating else "Unrated (est. " ~ profile.rating_estimate ~ ")" }} · {{ ui.status_pill("learner", profile.status) }}{% if learner.disabled %} <span class="pill pill-red">Deactivated</span>{% endif %}</div>
     </div>
   </div>
   <div class="actions">
@@ -136,6 +136,22 @@
         {% if current_user.is_admin %}<li><span class="muted">Login email</span><span class="meta" style="color:var(--ink)">{{ learner.email }}</span></li>{% endif %}
       </ul>
     </div>
+    {% if current_user.is_admin %}
+    {% if not learner.is_admin %}
+    <form class="card" method="POST" action="{{ url_for('coaching.admin_set_active', user_id=learner.id) }}"
+          {% if not learner.disabled %}data-confirm="Deactivate {{ learner.name }}? They won't be able to sign in. You can reactivate them later."{% endif %}>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="{{ 'reactivate' if learner.disabled else 'deactivate' }}">
+      <div class="card-b">
+        {% if learner.disabled %}
+          <button class="btn btn-sm" type="submit">Reactivate account</button>
+        {% else %}
+          <button class="btn btn-sm btn-danger" type="submit">Deactivate account</button>
+        {% endif %}
+      </div>
+    </form>
+    {% endif %}
+    {% endif %}
   </div>
 </div>
 {% endblock %}

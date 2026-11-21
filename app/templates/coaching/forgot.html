@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set title = "East Bay Chess Society | Reset your password" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='coaching/app.css') }}">{% endblock %}
+{% block content %}
+<div class="cx-pub cx-auth">
+  <div class="card">
+    <div class="kicker">EBCS Coaching</div>
+    <h1>Reset your password</h1>
+    <p class="muted small" style="margin:0 0 20px">Enter the email you signed up with and we'll send you a reset link.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="cx-flash {{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    <form method="POST" class="cx-form" novalidate>
+      {{ form.hidden_tag() }}
+      {{ ui.field(form.email, autocomplete="email", autofocus=True) }}
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" type="submit">Send reset link</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
