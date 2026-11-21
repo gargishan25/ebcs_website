@@ -3,8 +3,13 @@ from datetime import timedelta
 
 
 def _normalize_db_url(url: str) -> str:
+    # Pin the psycopg2 driver explicitly. SQLAlchemy 2.1+ treats a plain
+    # "postgresql://" URL as psycopg (v3), which isn't installed, so the app
+    # crashed on Render with "No module named 'psycopg'".
     if url and url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql://", 1)
+        url = url.replace("postgres://", "postgresql://", 1)
+    if url and url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+psycopg2://", 1)
     return url
 
 
