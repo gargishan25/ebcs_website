@@ -1,0 +1,55 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Safety{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Safety review</h1><div class="sub">Reported messages come first. You can open any coaching thread.</div></div></div>
+
+<div class="grid g-main">
+  <div class="stack">
+    <div class="card" {% if flagged %}style="border-color:#f0c9c4"{% endif %}>
+      <div class="card-h"><h2>Reported</h2><span class="aside">{% if flagged %}<span class="pill pill-red">{{ flagged|length }}</span>{% endif %}</span></div>
+      {% if flagged %}
+      <ul class="list">
+        {% for m in flagged %}
+        <li style="align-items:flex-start">
+          {{ ui.avatar(m.sender) }}
+          <div class="grow">
+            <div class="small"><b>{{ m.sender.name }}</b> <span class="muted">in {{ m.pairing.coach.first_name }} / {{ m.pairing.learner.first_name }} · {{ m.created_at|dt }}</span></div>
+            <div style="white-space:pre-wrap;margin:4px 0">{{ m.body }}</div>
+            <div class="tiny" style="color:var(--red)">{{ m.flag_reason }}</div>
+          </div>
+          <div class="row">
+            <a class="btn btn-sm" href="{{ url_for('coaching.thread', pairing_id=m.pairing_id) }}">Open thread</a>
+            <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn btn-sm btn-ghost" type="submit">Clear</button></form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}{{ ui.empty("Nothing reported", "", "♔") }}{% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Recent messages</h2><span class="aside small muted">last {{ recent|length }}</span></div>
+      <ul class="list small">
+        {% for m in recent %}
+        <li style="align-items:flex-start">
+          <span class="nowrap muted" style="width:92px">{{ m.created_at|rel }}</span>
+          <span class="strong nowrap" style="width:120px;overflow:hidden;text-overflow:ellipsis">{{ m.sender.name }}</span>
+          <a class="grow" href="{{ url_for('coaching.thread', pairing_id=m.pairing_id) }}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ m.body }}</a>
+          <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="id" value="{{ m.id }}"><button class="flagbtn btn btn-sm btn-ghost" type="submit" title="Flag">{{ ui.icon("flag") }}</button></form>
+        </li>
+        {% else %}<li class="muted">No messages yet.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="card" style="align-self:start">
+    <div class="card-h"><h2>Active threads</h2></div>
+    <ul class="list small list-hover">
+      {% for p in pairings %}
+      <li><a class="cover" href="{{ url_for('coaching.thread', pairing_id=p.id) }}"><span class="grow">{{ p.coach.name }} <span class="faint">→</span> {{ p.learner.name }}</span><span class="meta">{{ p.messages|length }}</span></a></li>
+      {% else %}<li class="muted">None</li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

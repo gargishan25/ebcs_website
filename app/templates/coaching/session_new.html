@@ -1,0 +1,47 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.schedule" %}
+{% block title %}New session{% endblock %}
+{% block crumbs %}<a href="{{ url_for('coaching.schedule') }}">Schedule</a><span class="sep">/</span><b>New session</b>{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Schedule a session</h1><div class="sub">Times are Pacific. Your learner will see it on their dashboard right away.</div></div></div>
+
+<div class="grid g-main">
+  <form method="POST" class="card" novalidate>
+    {{ form.hidden_tag() }}
+    <div class="card-b">
+      {{ ui.field(form.pairing) }}
+      <div class="f-row">
+        {{ ui.field(form.date) }}
+        {{ ui.field(form.time, step=900) }}
+        {{ ui.field(form.duration) }}
+      </div>
+      <div class="f-row">
+        {{ ui.field(form.repeat, hint="Weekly repeats skip any week that clashes.") }}
+        <div></div>
+      </div>
+      {{ ui.field(form.location, hint="The video call link (Google Meet, Zoom, etc.). Your learner sees it on their dashboard.", placeholder="https://meet.google.com/...") }}
+      {{ ui.field(form.agenda, rows=3, placeholder="e.g. Review homework, then knight endgames.") }}
+    </div>
+    <div class="card-f row"><button class="btn btn-primary" type="submit">{{ ui.icon("calendar") }} Schedule</button><a class="btn btn-ghost" href="{{ url_for('coaching.schedule') }}">Cancel</a></div>
+  </form>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Shared hours</h2></div>
+      <ul class="list">
+        {% for p in pairings %}
+          {%- set lp = p.learner.learner -%}
+          {%- set cp = p.coach.coach -%}
+          {%- set shared = (lp.availability if lp else [])|select("in", (cp.availability if cp else []))|list -%}
+          <li style="align-items:flex-start">{{ ui.avatar(p.learner) }}<div class="grow"><div class="strong small">{{ p.learner.name }}</div>
+            <div class="small muted">{{ cat.describe_slots(shared, 4) or "No overlap - agree a time in messages" }}</div></div></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card"><div class="card-b small muted">
+      <b style="color:var(--ink)">After the session</b>, open it from your schedule and file a quick report. That's how the session gets logged in your hours.
+    </div></div>
+  </div>
+</div>
+{% endblock %}

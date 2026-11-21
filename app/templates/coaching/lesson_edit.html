@@ -1,0 +1,33 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.library" %}
+{% block title %}{{ "Edit lesson" if l else "New lesson" }}{% endblock %}
+{% block crumbs %}<a href="{{ url_for('coaching.library') }}">Library</a><span class="sep">/</span><b>{{ l.title if l else "New lesson" }}</b>{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>{{ "Edit lesson" if l else "Write a lesson" }}</h1><div class="sub">Lessons are shared with every coach and learner in the program.</div></div></div>
+<form method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  <div class="grid g-main-wide">
+    <div class="card"><div class="card-b">
+      {{ ui.field(form.title) }}
+      {{ ui.field(form.summary) }}
+      {{ ui.field(form.body, rows=14, hint="Leave a blank line between paragraphs. Start a line with '- ' for a bullet point, and wrap words in **double stars** for bold.") }}
+    </div>
+    <div class="card-f row"><button class="btn btn-primary" type="submit">Save lesson</button><a class="btn btn-ghost" href="{{ url_for('coaching.lesson', slug=l.slug) if l else url_for('coaching.library') }}">Cancel</a></div></div>
+
+    <div class="stack">
+      <div class="card"><div class="card-b">
+        <div class="f-row">{{ ui.field(form.track) }}{{ ui.field(form.level) }}</div>
+        {{ ui.field(form.minutes) }}
+        <div class="f"><label class="check">{{ form.published() }} <span>Published (visible to learners)</span></label></div>
+      </div></div>
+      <div class="card"><div class="card-h"><h2>Position</h2><span class="aside tiny muted">optional</span></div><div class="card-b">
+        {{ ui.field(form.fen, hint="Paste a FEN from Lichess (Share & export) or Chess.com.", placeholder="6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1", class_="mono") }}
+        {{ ui.field(form.solution, hint="Accepted first moves in SAN, separated by ' / '. Leave blank to allow free play. Any checkmate also counts as correct.", placeholder="Rd8# / Re8") }}
+        <div data-board-mini data-fen="{{ form.fen.data or '8/8/8/8/8/8/8/8 w - - 0 1' }}" id="fen-preview" style="max-width:220px"></div>
+      </div></div>
+    </div>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='coaching/board.js') }}"></script>{% endblock %}

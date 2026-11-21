@@ -1,0 +1,26 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Messages</h1><div class="sub">One thread per coaching pairing. EBCS staff can read every thread.</div></div></div>
+<div class="card">
+  {% if threads %}
+  <ul class="list list-hover">
+    {% for t in threads %}
+    <li>
+      <a class="cover" href="{{ url_for('coaching.thread', pairing_id=t.p.id) }}">
+        {{ ui.avatar(t.other) }}
+        <div class="grow">
+          <div class="row"><span class="strong">{{ t.other.name }}</span>{% if t.p.status != "active" %}<span class="pill no-dot">Ended</span>{% endif %}</div>
+          <div class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{% if t.last %}{{ "You: " if t.last.sender_id == current_user.id }}{{ t.last.body|truncate(110) }}{% else %}No messages yet{% endif %}</div>
+        </div>
+        <span class="meta">{% if t.unread %}<span class="pill pill-gold no-dot">{{ t.unread }}</span> {% endif %}{{ t.last.created_at|rel if t.last }}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+    {{ ui.empty("No conversations yet", "A thread opens automatically when you're matched.") }}
+  {% endif %}
+</div>
+{% endblock %}

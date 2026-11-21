@@ -1,0 +1,17 @@
+# Local database (contains real account data - never commit)
+instance/
+*.db
+*.sqlite3
+
+# Python build junk
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets
+.env
+.env.*
+
+# macOS
+.DS_Store

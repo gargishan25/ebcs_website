@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set title = "East Bay Chess Society | Get a free coach" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='coaching/app.css') }}">{% endblock %}
+{% block content %}
+<div class="cx-pub">
+  <div class="wrap cx-form-wrap">
+    <aside class="cx-form-nav">
+      <div class="kicker">Learner sign-up</div>
+      <h1>Get a free coach</h1>
+      <p>About three minutes. You can change anything later from your settings.</p>
+      <ol>
+        <li><a href="#s-account" class="on">Account</a></li>
+        <li><a href="#s-you">About you</a></li>
+        <li><a href="#s-goals">Goals</a></li>
+        <li><a href="#s-time">Availability</a></li>
+        <li><a href="#s-guardian">Parent / guardian</a></li>
+        <li><a href="#s-agree">Finish</a></li>
+      </ol>
+    </aside>
+
+    <form method="POST" class="cx-form" data-signup data-minor="{{ cat.MINOR_BANDS|join(',') }}" novalidate>
+      {{ form.hidden_tag() }}
+      {% if form.errors %}<div class="cx-flash error">A few things need fixing. They're marked below.</div>{% endif %}
+
+      <section class="sec" id="s-account">
+        <h2>Account</h2>
+        <p class="sec-sub">You'll use this to sign in, see your coach and track your progress.</p>
+        {{ ui.field(form.name, autocomplete="name") }}
+        {{ ui.field(form.email, hint="If you're signing up a child, use the email they'll sign in with, or your own.", autocomplete="email") }}
+        <div class="f-row">
+          {{ ui.field(form.password, autocomplete="new-password") }}
+          {{ ui.field(form.confirm, autocomplete="new-password") }}
+        </div>
+      </section>
+
+      <section class="sec" id="s-you">
+        <h2>About you</h2>
+        <p class="sec-sub">This helps us pick a coach at the right level.</p>
+        {{ ui.choices(form.age_band, cols="") }}
+        {{ ui.choices(form.level, cols="one-col") }}
+        <div class="f-row">
+          {{ ui.field(form.rating, hint="USCF, Chess.com or Lichess. Leave blank if you don't know.", inputmode="numeric", placeholder="e.g. 850") }}
+          <div></div>
+        </div>
+      </section>
+
+      <section class="sec" id="s-goals">
+        <h2>Goals</h2>
+        <p class="sec-sub">Pick as many as you like. We match these against what coaches teach best.</p>
+        {{ ui.choices(form.goals) }}
+        {{ ui.field(form.goal_text, rows=3, placeholder="e.g. I keep losing my queen early, or I have a tournament in March.") }}
+      </section>
+
+      <section class="sec" id="s-time">
+        <h2>Availability</h2>
+        <p class="sec-sub">Sessions are online. Mark every hour you could usually meet. The more you mark, the faster we can match you.</p>
+        <div class="f {% if form.availability.errors %}has-err{% endif %}">
+          <span class="lbl">{{ form.availability.label.text }}</span>
+          {{ ui.avail_grid("availability", form.availability.data) }}
+          {% for e in form.availability.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+      </section>
+
+      <section class="sec minor-only" id="s-guardian">
+        <h2>Parent or guardian</h2>
+        <p class="sec-sub">Required for learners under 18. Only EBCS staff can see these details. We'll use them to reach you about scheduling or safety.</p>
+        <div class="f-row">
+          {{ ui.field(form.guardian_name) }}
+          {{ ui.field(form.guardian_email) }}
+        </div>
+        {{ ui.field(form.guardian_phone, hint="Optional") }}
+        <div class="f {% if form.guardian_consent.errors %}has-err{% endif %}">
+          <label class="check">{{ form.guardian_consent() }} <span>{{ form.guardian_consent.label.text }}</span></label>
+          {% for e in form.guardian_consent.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+      </section>
+
+      <section class="sec" id="s-agree">
+        <h2>Finish</h2>
+        <p class="sec-sub">Coaching is free. All we ask is that you show up, or cancel ahead of time.</p>
+        <div class="f {% if form.conduct.errors %}has-err{% endif %}">
+          <label class="check">{{ form.conduct() }} <span>I agree to the <a class="link" href="{{ url_for('coaching.guidelines') }}" target="_blank">EBCS community guidelines</a>.</span></label>
+          {% for e in form.conduct.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="submit-bar">
+          <button class="btn btn-primary btn-lg" type="submit">Create account</button>
+          <span class="small muted">Already signed up? <a class="link" href="{{ url_for('coaching.login') }}">Sign in</a></span>
+        </div>
+      </section>
+    </form>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='coaching/app.js') }}" defer></script>
+{% endblock %}

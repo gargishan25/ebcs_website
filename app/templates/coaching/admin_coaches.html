@@ -1,0 +1,46 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Coaches{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Coaches</h1><div class="sub">Review applications and manage your active roster.</div></div></div>
+
+<div class="kanban" style="margin-bottom:22px">
+  {% for key, label in statuses %}
+  <div class="lane">
+    <div class="lane-h">{{ ui.status_pill("coach", key) }}<span class="n">{{ columns[key]|length }}</span></div>
+    {% for c in columns[key] %}
+      <a class="ticket" href="{{ url_for('coaching.admin_coach', user_id=c.user_id) }}">
+        <div class="row-between"><b>{{ c.user.name }}</b><span class="num small">{{ c.rating or "-" }}</span></div>
+        <div class="sub">{{ c.school }} · {{ c.grade }}th</div>
+        <div class="tags" style="margin-top:6px">{% for s in c.specialties[:3] %}<span class="tag">{{ cat.FOCUS_LABELS[s] }}</span>{% endfor %}</div>
+        <div class="tiny faint" style="margin-top:6px">{{ "Applied " ~ (c.created_at|rel) if key in ["applied", "screening"] else (c.load ~ "/" ~ c.max_learners ~ " learners") }}</div>
+      </a>
+    {% else %}
+      <div class="tiny faint" style="padding:4px 6px">Empty</div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <div class="card-h"><h2>Active roster</h2><span class="aside small muted">{{ approved|length }} approved</span></div>
+  {% if approved %}
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>Coach</th><th>Rating</th><th>Specialties</th><th class="right">Load</th><th class="right">Hours free</th><th class="right">Hours supported</th><th></th></tr></thead>
+    <tbody>
+    {% for c in approved %}
+      <tr data-href="{{ url_for('coaching.admin_coach', user_id=c.user_id) }}">
+        <td><div class="who">{{ ui.avatar(c.user) }}<div><b>{{ c.user.name }}</b><small>{{ c.school }}</small></div></div></td>
+        <td class="num">{{ c.rating or "-" }}{% if not c.uscf_rating and c.online_rating %} <span class="faint tiny">online</span>{% endif %}</td>
+        <td><div class="tags">{% for s in c.specialties %}<span class="tag">{{ cat.FOCUS_LABELS[s] }}</span>{% endfor %}</div></td>
+        <td class="right num">{{ c.load }}/{{ c.max_learners }}</td>
+        <td class="right num">{{ c.availability|length }}</td>
+        <td class="right num">{{ ((hours.get(c.user_id, 0) or 0) / 60)|round(1) }}</td>
+        <td class="right">{% if c.capacity_left %}<span class="pill pill-green">{{ c.capacity_left }} open</span>{% else %}<span class="pill">Full</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{{ ui.empty("No approved coaches yet", "Approve applicants from the pipeline above.") }}{% endif %}
+</div>
+{% endblock %}

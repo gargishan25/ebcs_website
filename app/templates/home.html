@@ -9,7 +9,13 @@
         The East Bay Chess Society (EBCS) is a student-led organization dedicated to making chess more accessible for enthusiasts and competitors, while also supporting players attempting to ease back into the game. We aim to develop the game of the younger generation while helping them build a genuine connection with chess.
       </p>
       <div class="hero-actions">
+        {# ARCHIVED (Nov 2026): tournament button. Restore together with the /events/ route in app/routes.py.
         <a class="button button-secondary" href="{{ url_for('main.tournaments') }}">View Upcoming Events</a>
+        #}
+        {% if coaching_enabled %}
+        <a class="button" href="{{ url_for('coaching.join_learner') }}">Get a free coach</a>
+        <a class="button button-secondary" href="{{ url_for('coaching.join_coach') }}">Apply to coach</a>
+        {% endif %}
       </div>
       <div class="stats">
         <div><strong>Beginner friendly</strong><span>Open doors for new players</span></div>
@@ -17,6 +23,8 @@
         <div><strong>Community first</strong><span>Local partnerships</span></div>
       </div>
     </div>
+    {# ARCHIVED (Nov 2026): "Upcoming Event" card for the 2026 East Bay Rapid & Blitz.
+       Restore together with the /2026r&b/ route in app/routes.py.
     <div class="hero-card">
       <div class="card-label">Upcoming Event</div>
       <h2>2026 East Bay Rapid & Blitz</h2>
@@ -28,6 +36,20 @@
       </ul>
       <a class="text-link" href="{{ url_for('main.event_details') }}">See tournament details →</a>
     </div>
+    #}
+    {% if coaching_enabled %}
+    <div class="hero-card">
+      <div class="card-label">Free Coaching</div>
+      <h2>One-on-one chess coaching, free for everyone</h2>
+      <p>Learn from vetted high-school coaches, matched to your level, goals and schedule.</p>
+      <ul>
+        <li>Any age, any level, all online</li>
+        <li>Session notes, homework and a skill map that tracks your progress</li>
+        <li>High schoolers: coach with us and help others grow</li>
+      </ul>
+      <a class="text-link" href="{{ url_for('coaching.landing') }}">How EBCS Coaching works →</a>
+    </div>
+    {% endif %}
   </div>
 </section>
 

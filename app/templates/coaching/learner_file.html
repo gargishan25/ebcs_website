@@ -1,0 +1,141 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.admin_learners" if current_user.is_admin else "coaching.app_home" %}
+{% block title %}{{ learner.name }}{% endblock %}
+{% block crumbs %}<a href="{{ url_for('coaching.admin_learners') if current_user.is_admin else url_for('coaching.app_home') }}">{{ "Learners" if current_user.is_admin else "Roster" }}</a><span class="sep">/</span><b>{{ learner.name }}</b>{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div class="row" style="gap:14px">
+    {{ ui.avatar(learner, "avatar-xl") }}
+    <div>
+      <h1>{{ learner.name }}</h1>
+      <div class="sub">{{ cat.AGE_LABELS.get(profile.age_band, "") }} · {{ cat.LEVEL_LABELS.get(profile.level, "").split(" - ")[0] }} · {{ "Rated " ~ profile.rating if profile.rating else "Unrated (est. " ~ profile.rating_estimate ~ ")" }} · {{ ui.status_pill("learner", profile.status) }}</div>
+    </div>
+  </div>
+  <div class="actions">
+    {% if pairing %}
+      <a class="btn" href="{{ url_for('coaching.thread', pairing_id=pairing.id) }}">{{ ui.icon("message") }} Message</a>
+      <a class="btn btn-primary" href="{{ url_for('coaching.session_new', pairing=pairing.id) }}">{{ ui.icon("plus") }} Schedule</a>
+    {% elif current_user.is_admin %}
+      <a class="btn btn-primary" href="{{ url_for('coaching.admin_match', user_id=learner.id) }}">Find a coach</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid g-main-wide">
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Skill map</h2><span class="aside tiny muted"><span style="color:var(--gold)">- -</span> 30 days ago &nbsp; <span style="color:var(--blue)">—</span> now</span></div>
+      <div class="grid g-2" style="gap:0">
+        <div class="card-b">{% if snap %}{{ radar }}{% else %}{{ ui.empty("No assessment yet", "Rate each skill on the right after a session or two.", "♜") }}{% endif %}</div>
+        {% if pairing %}
+        <form class="card-b" method="POST" action="{{ url_for('coaching.learner_assess', user_id=learner.id) }}" style="border-left:1px solid var(--line-2)">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <table class="tbl" style="font-size:12.5px">
+            {% for key, label in cat.SKILLS %}
+            <tr><td style="padding:5px 0">{{ label }}</td>
+              <td style="padding:5px 0;width:160px">
+                <select name="skill_{{ key }}" style="min-height:28px;padding:3px 8px;font-size:12.5px">
+                  {% for v, vl in cat.SKILL_SCALE.items() %}<option value="{{ v }}" {% if snap.get(key, 0) == v %}selected{% endif %}>{{ v }} · {{ vl }}</option>{% endfor %}
+                </select></td></tr>
+            {% endfor %}
+          </table>
+          <input type="text" name="note" placeholder="Note (optional)" style="margin:10px 0">
+          <button class="btn btn-primary btn-sm" type="submit">Save assessment</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Sessions</h2><span class="aside small muted">{{ sessions|selectattr("status", "equalto", "completed")|list|length }} completed</span></div>
+      {% if sessions %}
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Date</th><th>Status</th><th>Covered</th><th>Notes</th><th class="right">Rating</th></tr></thead>
+        <tbody>
+        {% for s in sessions[:20] %}
+          <tr data-href="{{ url_for('coaching.session_detail', session_id=s.id) }}">
+            <td class="nowrap">{{ s.starts_at|dt("short") }}<div class="tiny faint">{{ s.starts_at|dt("time") }}</div></td>
+            <td>{% if s.needs_report %}<span class="pill pill-amber">Report due</span>{% else %}{{ ui.status_pill("session", s.status) }}{% endif %}</td>
+            <td><div class="tags">{% for t in s.topics %}<span class="tag">{{ skill_labels.get(t, t) }}</span>{% endfor %}</div></td>
+            <td class="small muted" style="max-width:280px">{{ (s.summary or s.agenda or "")|truncate(90) }}</td>
+            <td class="right num">{{ s.learner_rating ~ "/5" if s.learner_rating else "" }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      {% else %}{{ ui.empty("No sessions yet") }}{% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Assessment history</h2></div>
+      {% if history %}
+      <ul class="list small">
+        {% for a in history %}
+        <li><span class="strong" style="width:110px">{{ skill_labels[a.skill] }}</span><span class="num">{{ a.level }} · {{ cat.SKILL_SCALE[a.level] }}</span>{% if a.note %}<span class="muted">“{{ a.note }}”</span>{% endif %}<span class="meta">{{ a.assessed_by.first_name if a.assessed_by }} · {{ a.created_at|rel }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}{{ ui.empty("Nothing recorded yet") }}{% endif %}
+    </div>
+  </div>
+
+  <div class="stack">
+    {% if pairing %}
+    <div class="card">
+      <div class="card-h"><h2>Homework</h2></div>
+      {% if pairing.assignments %}
+      <ul class="list small">
+        {% for a in pairing.assignments|sort(attribute="assigned_at", reverse=True) %}
+        <li>
+          {% if a.completed_at %}<span class="pill pill-green no-dot">Done</span>{% else %}<span class="pill pill-blue no-dot">Open</span>{% endif %}
+          <a class="grow" href="{{ url_for('coaching.lesson', slug=a.lesson.slug) }}">{{ a.lesson.title }}</a>
+          <span class="meta">{{ a.due_on.strftime("%b %-d") if a.due_on else a.assigned_at|rel }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <form class="card-f" method="POST" action="{{ url_for('coaching.assign_lesson', pairing_id=pairing.id) }}" novalidate>
+        {{ assign_form.hidden_tag() }}
+        <div class="f" style="margin-bottom:8px">{{ assign_form.lesson() }}</div>
+        <div class="row" style="margin-bottom:8px">{{ assign_form.due_on(style="max-width:150px") }}{{ assign_form.note(placeholder="Note") }}</div>
+        <button class="btn btn-sm btn-primary" type="submit">{{ ui.icon("plus") }} Assign</button>
+      </form>
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <div class="card-h"><h2>Goals</h2></div>
+      <div class="card-b small">
+        <div class="tags" style="margin-bottom:8px">{% for g in profile.goals %}<span class="tag">{{ cat.FOCUS_LABELS[g] }}</span>{% else %}<span class="faint">None selected</span>{% endfor %}</div>
+        {% if profile.goal_text %}<p class="muted" style="margin:0">“{{ profile.goal_text }}”</p>{% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Availability</h2></div>
+      <div class="card-b">
+        {%- set coach_av = pairing.coach.coach.availability if pairing and pairing.coach.coach else [] -%}
+        {{ ui.avail_grid("x", profile.availability, editable=False, shared=profile.availability|select("in", coach_av)|list, compare=coach_av) }}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Safeguarding</h2></div>
+      <ul class="list small">
+        <li><span class="muted">Under 18</span><span class="meta" style="color:var(--ink)">{{ "Yes" if profile.is_minor else "No" }}</span></li>
+        {% if profile.is_minor %}
+        <li><span class="muted">Guardian consent</span><span class="meta">{% if profile.guardian_consent_at %}<span class="pill pill-green">On file</span>{% else %}<span class="pill pill-red">Missing</span>{% endif %}</span></li>
+          {% if current_user.is_admin %}
+          <li><span class="muted">Guardian</span><span class="meta" style="color:var(--ink)">{{ profile.guardian_name }}</span></li>
+          <li><span class="muted">Email</span><span class="meta" style="color:var(--ink)">{{ profile.guardian_email }}</span></li>
+          <li><span class="muted">Phone</span><span class="meta" style="color:var(--ink)">{{ profile.guardian_phone or "-" }}</span></li>
+          {% else %}
+          <li class="tiny muted">Guardian contact details are visible to EBCS staff only.</li>
+          {% endif %}
+        {% endif %}
+        {% if current_user.is_admin %}<li><span class="muted">Login email</span><span class="meta" style="color:var(--ink)">{{ learner.email }}</span></li>{% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

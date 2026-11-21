@@ -1,0 +1,55 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Hours supported{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div><h1>Hours supported</h1><div class="sub">Time you've spent supporting learners. Sessions are logged automatically when you file a report. Add prep time and events here. EBCS staff confirm each entry.</div></div>
+  <div class="actions"><a class="btn" href="{{ url_for('coaching.hours_statement') }}">{{ ui.icon("printer") }} Print summary</a></div>
+</div>
+
+<div class="grid g-main">
+  <div class="stack">
+    <div class="card">
+      <div class="card-b row" style="gap:28px;padding:22px">
+        <div class="ring-wrap">{{ ring }}<div class="ring-center"><b>{{ (totals.verified / 60)|round(1) }}</b><small>of {{ (goal / 60)|int }}h</small></div></div>
+        <div class="grid g-3 grow" style="gap:0">
+          <div class="kpi" style="border:0"><div class="k-label">Confirmed</div><div class="k-value">{{ totals.verified|mins }}</div><div class="k-sub">checked by staff</div></div>
+          <div class="kpi"><div class="k-label">Pending</div><div class="k-value">{{ totals.pending|mins }}</div><div class="k-sub">awaiting staff</div></div>
+          <div class="kpi"><div class="k-label">To goal</div><div class="k-value">{{ ([goal - totals.verified, 0]|max)|mins }}</div><div class="k-sub">goal {{ (goal / 60)|int }}h</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Log</h2><span class="aside small muted">{{ entries|length }} entries</span></div>
+      {% if entries %}
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Date</th><th>Type</th><th>Description</th><th class="right">Time</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for e in entries %}
+          <tr {% if e.session_id %}data-href="{{ url_for('coaching.session_detail', session_id=e.session_id) }}"{% endif %}>
+            <td class="nowrap num">{{ e.worked_on.strftime("%b %-d, %Y") }}</td>
+            <td>{{ cat.HOUR_KIND_LABELS.get(e.kind, e.kind) }}</td>
+            <td class="small">{{ e.description }}</td>
+            <td class="right num">{{ e.minutes|mins }}</td>
+            <td>{{ ui.status_pill("hours", e.status) }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      {% else %}{{ ui.empty("No hours yet", "Your first session report will appear here.") }}{% endif %}
+    </div>
+  </div>
+
+  <form class="card" method="POST" novalidate style="align-self:start">
+    {{ form.hidden_tag() }}
+    <div class="card-h"><h2>Log other time</h2></div>
+    <div class="card-b">
+      {{ ui.field(form.kind) }}
+      <div class="f-row">{{ ui.field(form.worked_on) }}{{ ui.field(form.minutes, inputmode="numeric", placeholder="60") }}</div>
+      {{ ui.field(form.description, placeholder="e.g. Prepared an endgame lesson for Hannah") }}
+    </div>
+    <div class="card-f"><button class="btn btn-primary" type="submit">{{ ui.icon("plus") }} Log time</button></div>
+  </form>
+</div>
+{% endblock %}

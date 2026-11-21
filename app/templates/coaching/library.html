@@ -1,0 +1,41 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Lesson library{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div><h1>Lesson library</h1><div class="sub">{{ count }} lesson{{ "s" if count != 1 }}. Positions are interactive: make moves right on the board.</div></div>
+  <div class="actions">
+    <div class="seg">
+      <a href="{{ url_for('coaching.library') }}" class="{% if not track %}on{% endif %}">All</a>
+      {% for k, label in tracks %}<a href="{{ url_for('coaching.library', track=k) }}" class="{% if track == k %}on{% endif %}">{{ label }}</a>{% endfor %}
+    </div>
+    {% if current_user.is_admin or (current_user.is_coach and current_user.coach and current_user.coach.status == "approved") %}
+      <a class="btn btn-primary" href="{{ url_for('coaching.lesson_edit') }}">{{ ui.icon("plus") }} New lesson</a>
+    {% endif %}
+  </div>
+</div>
+
+{% for k, label in tracks if grouped[k] %}
+  <div class="row-between" style="margin:{{ '0' if loop.first else '26px' }} 0 10px"><h2 style="font-size:15px">{{ label }}</h2><span class="small muted">{{ grouped[k]|length }}</span></div>
+  <div class="lessons">
+    {% for l in grouped[k] %}
+    <a class="lesson-card" href="{{ url_for('coaching.lesson', slug=l.slug) }}">
+      {% if l.fen %}<div data-board-mini data-fen="{{ l.fen }}"></div>{% endif %}
+      <div class="row-between"><span class="eyebrow">{{ label }}</span>{{ ui.level_bars(l.level) }}</div>
+      <h3>{{ l.title }}</h3>
+      <p>{{ l.summary }}</p>
+      <div class="foot">
+        <span>{{ l.minutes }} min</span>
+        {% if l.solution %}<span>· puzzle</span>{% endif %}
+        {% if not l.published %}<span class="pill pill-amber">Draft</span>{% endif %}
+        {% set a = assigned.get(l.id) %}
+        {% if a %}<span style="margin-left:auto">{% if a.completed_at %}<span class="pill pill-green">Done</span>{% else %}<span class="pill pill-blue">Assigned</span>{% endif %}</span>{% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card">{{ ui.empty("No lessons here yet") }}</div>
+{% endfor %}
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='coaching/board.js') }}"></script>{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.hours" %}
+{% block title %}Hours summary{% endblock %}
+{% block crumbs %}<a href="{{ url_for('coaching.hours') }}">Hours supported</a><span class="sep">/</span><b>Summary</b>{% endblock %}
+{% block content %}
+<div class="row no-print" style="margin-bottom:16px">
+  <span class="small muted grow">Includes hours confirmed by EBCS staff. For your own records. This is not an official service-hours document.</span>
+  <button class="btn btn-primary" type="button" onclick="window.print()">{{ ui.icon("printer") }} Print / save PDF</button>
+</div>
+<div class="statement">
+  <div class="seal">
+    <img src="{{ url_for('static', filename='img/ebcs-logo.webp') }}" alt="">
+    <div><div class="strong">East Bay Chess Society</div><div class="small muted">EBCS Coaching · eastbaychesssociety@gmail.com</div></div>
+    <div style="margin-left:auto;text-align:right" class="small muted">Issued {{ issued.strftime("%B %-d, %Y") }}<br></div>
+  </div>
+  <h1>Hours supported summary</h1>
+  <p style="margin:14px 0 20px;line-height:1.7">Time <b>{{ coach.name }}</b> has spent supporting learners through EBCS Coaching, as logged on the platform and confirmed by EBCS staff. For internal tracking.</p>
+
+  <div class="kpis" style="box-shadow:none;margin-bottom:22px">
+    <div class="kpi"><div class="k-label">Total confirmed</div><div class="k-value">{{ (total / 60)|round(1) }} h</div></div>
+    <div class="kpi"><div class="k-label">Entries</div><div class="k-value">{{ entries|length }}</div></div>
+    <div class="kpi"><div class="k-label">Period</div><div class="k-value" style="font-size:16px;padding-top:8px">{% if entries %}{{ entries[0].worked_on.strftime("%b %Y") }} - {{ entries[-1].worked_on.strftime("%b %Y") }}{% else %}-{% endif %}</div></div>
+  </div>
+
+  {% if by_month %}
+  <table class="tbl" style="margin-bottom:22px">
+    <thead><tr><th>Month</th><th class="right">Hours</th></tr></thead>
+    <tbody>{% for m, mins in by_month.items() %}<tr><td>{{ m }}</td><td class="right num">{{ (mins / 60)|round(2) }}</td></tr>{% endfor %}</tbody>
+  </table>
+  <table class="tbl">
+    <thead><tr><th>Date</th><th>Activity</th><th class="right">Hours</th><th>Confirmed</th></tr></thead>
+    <tbody>
+    {% for e in entries %}
+      <tr><td class="num nowrap">{{ e.worked_on.strftime("%m/%d/%Y") }}</td><td class="small">{{ cat.HOUR_KIND_LABELS.get(e.kind) }}{% if e.kind != "session" %}: {{ e.description }}{% endif %}</td>
+        <td class="right num">{{ (e.minutes / 60)|round(2) }}</td><td class="small muted">{{ e.reviewed_at.strftime("%m/%d/%Y") if e.reviewed_at }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">No confirmed hours yet.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set title = "East Bay Chess Society | Sign in to Coaching" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='coaching/app.css') }}">{% endblock %}
+{% block content %}
+<div class="cx-pub cx-auth">
+  <div class="card">
+    <div class="kicker">EBCS Coaching</div>
+    <h1>Sign in</h1>
+    <p class="muted small" style="margin:0 0 20px">For learners, coaches and staff.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}<div class="cx-flash {{ category }}">{{ message }}</div>{% endfor %}
+    {% endwith %}
+    <form method="POST" class="cx-form" novalidate>
+      {{ form.hidden_tag() }}
+      {{ ui.field(form.email, autocomplete="email", autofocus=True) }}
+      {{ ui.field(form.password, autocomplete="current-password") }}
+      <div class="f"><label class="check">{{ form.remember() }} <span>{{ form.remember.label.text }}</span></label></div>
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center" type="submit">Sign in</button>
+    </form>
+    <div class="hr"></div>
+    {% if coaching_enabled %}
+    <p class="small muted" style="margin:0">New here? <a class="link" href="{{ url_for('coaching.join_learner') }}">Get a free coach</a> or <a class="link" href="{{ url_for('coaching.join_coach') }}">apply to coach</a>.</p>
+    {% endif %}
+    <p class="tiny faint" style="margin:8px 0 0">Forgot your password? Email eastbaychesssociety@gmail.com and staff will reset it.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div>
+    <h1>Hi, {{ current_user.first_name }}</h1>
+    <div class="sub">{% if pairing %}You're working with {{ pairing.coach.name }}.{% else %}Welcome to EBCS Coaching.{% endif %}</div>
+  </div>
+</div>
+
+{% if not pairing %}
+{# ------------------------------------------------------------ waiting --- #}
+<div class="grid g-main">
+  <div class="stack">
+    <div class="card card-navy">
+      <div class="card-b" style="padding:24px">
+        <div class="eyebrow">Status</div>
+        <div class="row" style="gap:18px;margin-top:8px;align-items:flex-end">
+          <div style="font-family:var(--serif);font-size:56px;line-height:.9;font-weight:700" class="num">#{{ queue_position }}</div>
+          <div class="grow"><div class="strong" style="font-size:16px">in the matching queue</div>
+            <div class="muted small">EBCS staff match learners in the order they sign up, based on when coaches are free.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>What happens next</h2></div>
+      <div class="card-b">
+        <div class="steps">
+          <div class="step done">Signed up</div>
+          <div class="step now">Matching</div>
+          <div class="step">First session</div>
+          <div class="step">Weekly coaching</div>
+        </div>
+        <p class="small muted" style="margin-top:14px">Once you're matched, your coach's name, a message thread, and your first session will all show up on this page. To speed things up, mark more available hours.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Your availability</h2><div class="aside"><a class="btn btn-sm" href="{{ url_for('coaching.settings') }}">Edit</a></div></div>
+      <div class="card-b">{{ ui.avail_grid("x", profile.availability, editable=False) }}</div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Your profile</h2></div>
+      <ul class="list">
+        <li><span class="muted small">Level</span><span class="meta" style="color:var(--ink)">{{ cat.LEVEL_LABELS.get(profile.level, "-").split(" - ")[0] }}</span></li>
+        <li><span class="muted small">Rating</span><span class="meta num" style="color:var(--ink)">{{ profile.rating or "Unrated" }}</span></li>
+        <li style="flex-wrap:wrap"><span class="muted small">Goals</span><div class="tags" style="margin-left:auto">{% for g in profile.goals %}<span class="tag">{{ cat.FOCUS_LABELS[g] }}</span>{% else %}<span class="faint small">None set</span>{% endfor %}</div></li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>While you wait</h2></div>
+      <div class="card-b small">
+        <p>The lesson library is open now. Start with the basics:</p>
+        <a class="link" href="{{ url_for('coaching.lesson', slug='checks-captures-threats') }}">The blunder check →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% else %}
+{# ------------------------------------------------------------ matched --- #}
+<div class="grid g-main">
+  <div class="stack">
+    {% if next_session %}
+    <div class="card card-navy">
+      <div class="card-b hero-next" style="padding:22px 24px">
+        <div>
+          <div class="eyebrow">Next session · <span class="countdown" data-countdown="{{ next_session.starts_at.isoformat() }}Z">{{ next_session.starts_at|rel }}</span></div>
+          <div class="big" style="margin:8px 0 6px">{{ next_session.starts_at|dt }}</div>
+          <div class="muted small">{{ next_session.duration_min }} min · Online{% if next_session.agenda %} · {{ next_session.agenda|truncate(80) }}{% endif %}</div>
+        </div>
+        <div class="row wrap">
+          {% if next_session.location and next_session.location.startswith("http") %}
+            <a class="btn btn-primary" style="background:#fff;color:var(--navy);border-color:#fff" href="{{ next_session.location }}" target="_blank" rel="noopener">{{ ui.icon("link") }} Join</a>
+          {% elif next_session.location %}
+            <span class="small">{{ next_session.location }}</span>
+          {% endif %}
+          <a class="btn" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.3)" href="{{ url_for('coaching.session_detail', session_id=next_session.id) }}">Details</a>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="card"><div class="card-b row-between">
+      <div><div class="strong">No session booked yet</div><div class="small muted">Message your coach to pick a time.</div></div>
+      <a class="btn btn-primary" href="{{ url_for('coaching.thread', pairing_id=pairing.id) }}">{{ ui.icon("message") }} Message {{ pairing.coach.first_name }}</a>
+    </div></div>
+    {% endif %}
+
+    {% for s in need_feedback %}
+    <div class="card card-accent"><div class="card-b row-between">
+      <div><div class="strong">How was your session on {{ s.starts_at|dt("short") }}?</div><div class="small muted">Your feedback helps us support your coach.</div></div>
+      <a class="btn" href="{{ url_for('coaching.session_detail', session_id=s.id) }}">{{ ui.icon("star") }} Rate it</a>
+    </div></div>
+    {% endfor %}
+
+    <div class="card">
+      <div class="card-h"><h2>Homework</h2><span class="aside small muted">{{ homework|length }} open</span></div>
+      {% if homework or done_homework %}
+      <ul class="list">
+        {% for a in homework %}
+        <li>
+          <form method="POST" action="{{ url_for('coaching.assignment_toggle', assignment_id=a.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm" title="Mark done" style="width:26px;padding:0;justify-content:center"></button>
+          </form>
+          <a class="grow" href="{{ url_for('coaching.lesson', slug=a.lesson.slug) }}">
+            <div class="strong">{{ a.lesson.title }}</div>
+            {% if a.note %}<div class="small muted">{{ a.note }}</div>{% endif %}
+          </a>
+          <span class="meta">{% if a.due_on %}due {{ a.due_on.strftime("%b %-d") }}{% endif %}</span>
+        </li>
+        {% endfor %}
+        {% for a in done_homework %}
+        <li>
+          <form method="POST" action="{{ url_for('coaching.assignment_toggle', assignment_id=a.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-primary" title="Mark not done" style="width:26px;padding:0;justify-content:center">{{ ui.icon("check") }}</button>
+          </form>
+          <a class="grow muted" href="{{ url_for('coaching.lesson', slug=a.lesson.slug) }}" style="text-decoration:line-through">{{ a.lesson.title }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+        {{ ui.empty("No homework yet", "Your coach will assign lessons after your sessions.") }}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Recent sessions</h2><div class="aside"><a class="btn btn-sm btn-ghost" href="{{ url_for('coaching.schedule') }}">All sessions</a></div></div>
+      {% if reports %}
+      <ul class="list">
+        {% for s in reports %}
+        <li style="align-items:flex-start">
+          {{ ui.datebox(s.starts_at) }}
+          <div class="grow">
+            <div class="tags" style="margin-bottom:4px">{% for t in s.topics %}<span class="tag">{{ cat.SKILL_LABELS.get(t, t) }}</span>{% endfor %}</div>
+            <div class="small">{{ s.summary or "No notes." }}</div>
+            {% if s.homework %}<div class="small muted" style="margin-top:4px"><b>Homework:</b> {{ s.homework }}</div>{% endif %}
+          </div>
+          <a class="meta link" href="{{ url_for('coaching.session_detail', session_id=s.id) }}">Open</a>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+        {{ ui.empty("No sessions yet", "Notes from each session will appear here.") }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h">{{ ui.avatar(pairing.coach, "avatar-lg") }}
+        <div class="grow"><div class="eyebrow">Your coach</div><div class="strong" style="font-size:15px">{{ pairing.coach.name }}</div></div>
+        {% if unread %}<span class="pill pill-gold">{{ unread }} new</span>{% endif %}
+      </div>
+      <div class="card-b small">
+        {% set c = pairing.coach.coach %}
+        <div class="muted" style="margin-bottom:8px">{{ c.grade }}th grade · {{ c.school }}{% if c.rating %} · <span class="num">{{ c.rating }}</span>{% endif %}</div>
+        {% if c.bio %}<p>{{ c.bio }}</p>{% endif %}
+        <div class="tags">{% for s in c.specialties %}<span class="tag {% if s in profile.goals %}tag-hit{% endif %}">{{ cat.FOCUS_LABELS[s] }}</span>{% endfor %}</div>
+      </div>
+      <div class="card-f"><a class="btn btn-sm" href="{{ url_for('coaching.thread', pairing_id=pairing.id) }}">{{ ui.icon("message") }} Message</a></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Skill map</h2><span class="aside tiny muted">{% if has_skills %}<span style="color:var(--gold)">- -</span> 30 days ago{% endif %}</span></div>
+      <div class="card-b">
+        {% if has_skills %}{{ radar }}{% else %}{{ ui.empty("Not assessed yet", "Your coach rates your skills after a few sessions.", "♜") }}{% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="kpis" style="border:0;box-shadow:none">
+        <div class="kpi"><div class="k-label">Sessions</div><div class="k-value">{{ total_sessions }}</div></div>
+        <div class="kpi"><div class="k-label">Time coached</div><div class="k-value">{{ total_minutes|mins }}</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

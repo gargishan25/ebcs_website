@@ -1,0 +1,144 @@
+{# App shell for every signed-in page of the coaching platform. #}
+{% import "coaching/_ui.html" as ui with context %}
+{%- set u = current_user -%}
+{%- set ep = request.endpoint or "" -%}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Coaching{% endblock %} · EBCS Coaching</title>
+  <link rel="icon" href="{{ url_for('static', filename='img/ebcs-logo.webp') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='coaching/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body class="cx-app">
+<div class="cx-shell">
+  <aside class="cx-side">
+    <a class="cx-brand" href="{{ url_for('coaching.app_home') }}">
+      <img src="{{ url_for('static', filename='img/ebcs-logo.webp') }}" alt="">
+      <span><b>EBCS Coaching</b><small>East Bay Chess Society</small></span>
+    </a>
+
+    {%- set nav = [] -%}
+    {%- if u.is_admin -%}
+      {%- set nav = [
+        ("Program", [
+          ("coaching.admin_overview", "Overview", "chart", None),
+          ("coaching.admin_learners", "Learners", "users", admin_counts.waiting),
+          ("coaching.admin_coaches", "Coaches", "knight", admin_counts.applicants),
+          ("coaching.schedule", "Schedule", "calendar", None),
+        ]),
+        ("Review", [
+          ("coaching.admin_hours", "Hours supported", "clock", admin_counts.hours),
+          ("coaching.admin_messages", "Safety", "shield", admin_counts.flagged),
+          ("coaching.admin_activity", "Activity log", "activity", None),
+        ]),
+        ("Content", [("coaching.library", "Lesson library", "book", None)]),
+      ] -%}
+    {%- elif u.is_coach -%}
+      {%- set nav = [
+        ("Coach", [
+          ("coaching.app_home", "Dashboard", "home", None),
+          ("coaching.schedule", "Schedule", "calendar", None),
+          ("coaching.inbox", "Messages", "message", unread_count),
+          ("coaching.hours", "Hours supported", "clock", None),
+        ]),
+        ("Teach", [("coaching.library", "Lesson library", "book", None)]),
+      ] -%}
+    {%- else -%}
+      {%- set nav = [
+        ("Learn", [
+          ("coaching.app_home", "Home", "home", None),
+          ("coaching.schedule", "Sessions", "calendar", None),
+          ("coaching.inbox", "Messages", "message", unread_count),
+          ("coaching.library", "Lessons", "book", None),
+        ]),
+      ] -%}
+    {%- endif -%}
+
+    <nav class="cx-nav">
+      {% for group, links in nav %}
+        <div class="cx-nav-label">{{ group }}</div>
+        {% for endpoint, label, ic, badge in links %}
+          <a href="{{ url_for(endpoint) }}" class="{% if ep == endpoint or (active_nav is defined and active_nav == endpoint) %}on{% endif %}">
+            {{ ui.icon(ic) }}<span>{{ label }}</span>{% if badge %}<span class="badge">{{ badge }}</span>{% endif %}
+          </a>
+        {% endfor %}
+      {% endfor %}
+      <div class="cx-nav-label">Account</div>
+      <a href="{{ url_for('coaching.settings') }}" class="{% if ep == 'coaching.settings' %}on{% endif %}">{{ ui.icon("settings") }}<span>Settings</span></a>
+    </nav>
+
+    <div class="cx-side-foot">
+      <div class="cx-me">{{ ui.avatar(u) }}<div class="grow"><div class="small strong">{{ u.name }}</div><small>{{ "EBCS staff" if u.is_admin else u.role }}</small></div></div>
+      <div class="cx-side-links">
+        <a href="{{ url_for('main.home') }}">ebcs site</a>
+        <a href="{{ url_for('coaching.guidelines') }}">guidelines</a>
+        <a href="{{ url_for('coaching.logout') }}">sign out</a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="cx-main">
+    <header class="cx-top">
+      <button class="btn btn-ghost btn-sm cx-burger" data-toggle-side aria-label="Menu">{{ ui.icon("menu") }}</button>
+      <div class="cx-crumbs">{% block crumbs %}<b>{{ self.title() }}</b>{% endblock %}</div>
+      <button class="cx-search" data-open-palette type="button">{{ ui.icon("search") }}<span>Jump to...</span><kbd>⌘K</kbd></button>
+    </header>
+
+    <main class="cx-page">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+{# ---- toasts ---- #}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="toasts" role="status">
+    {% for category, message in messages %}
+      <div class="toast {{ 'error' if category == 'error' else '' }}"><span>{{ message }}</span><button type="button" aria-label="Dismiss">×</button></div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+{# ---- command palette ---- #}
+{%- set pal = [] -%}
+{%- for group, links in nav -%}{%- for endpoint, label, ic, badge in links -%}
+  {%- set _ = pal.append({"label": label, "href": url_for(endpoint), "group": "Go to"}) -%}
+{%- endfor -%}{%- endfor -%}
+{%- set _ = pal.append({"label": "Settings & availability", "href": url_for('coaching.settings'), "group": "Go to", "keys": "profile password"}) -%}
+{%- if u.is_coach or u.is_admin -%}
+  {%- set _ = pal.append({"label": "Schedule a session", "href": url_for('coaching.session_new'), "group": "Action", "keys": "new book"}) -%}
+  {%- set _ = pal.append({"label": "Write a lesson", "href": url_for('coaching.lesson_edit'), "group": "Action", "keys": "new create"}) -%}
+{%- endif -%}
+{%- if u.is_coach -%}
+  {%- set _ = pal.append({"label": "Log coaching time", "href": url_for('coaching.hours'), "group": "Action", "keys": "hours supported log"}) -%}
+  {%- set _ = pal.append({"label": "Print hours summary", "href": url_for('coaching.hours_statement'), "group": "Action", "keys": "hours export pdf"}) -%}
+{%- endif -%}
+{%- set _ = pal.append({"label": "Download calendar (.ics)", "href": url_for('coaching.calendar_ics'), "group": "Action", "keys": "google apple export"}) -%}
+{%- for track, tlabel in cat.TRACKS -%}
+  {%- set _ = pal.append({"label": tlabel ~ " lessons", "href": url_for('coaching.library', track=track), "group": "Library"}) -%}
+{%- endfor -%}
+{%- set _ = pal.append({"label": "Home", "href": url_for('coaching.app_home'), "group": "Go to", "jump": "d"}) -%}
+{%- set _ = pal.append({"label": "Schedule", "href": url_for('coaching.schedule'), "group": "Go to", "jump": "s"}) -%}
+{%- set _ = pal.append({"label": "Messages", "href": url_for('coaching.inbox'), "group": "Go to", "jump": "m"}) -%}
+{%- set _ = pal.append({"label": "Library", "href": url_for('coaching.library'), "group": "Go to", "jump": "l"}) -%}
+{%- block palette_extra %}{% endblock -%}
+<div class="pal-back" id="cx-pal">
+  <div class="pal" role="dialog" aria-label="Command menu">
+    <input type="text" placeholder="Type a page or action..." aria-label="Search">
+    <ul></ul>
+    <div class="pal-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>↵</kbd> open</span><span><kbd>g</kbd> then <kbd>d</kbd>/<kbd>s</kbd>/<kbd>m</kbd>/<kbd>l</kbd> jump</span></div>
+  </div>
+</div>
+<script type="application/json" id="cx-pal-data">{{ pal|tojson }}</script>
+<script src="{{ url_for('static', filename='coaching/app.js') }}" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

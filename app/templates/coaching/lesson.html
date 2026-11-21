@@ -1,0 +1,50 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.library" %}
+{% block title %}{{ l.title }}{% endblock %}
+{% block crumbs %}<a href="{{ url_for('coaching.library') }}">Library</a><span class="sep">/</span><a href="{{ url_for('coaching.library', track=l.track) }}">{{ cat.TRACK_LABELS[l.track] }}</a><span class="sep">/</span><b>{{ l.title }}</b>{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div>
+    <div class="row small muted" style="margin-bottom:6px"><span class="eyebrow">{{ cat.TRACK_LABELS[l.track] }}</span>{{ ui.level_bars(l.level) }}<span>{{ l.minutes }} min</span></div>
+    <h1>{{ l.title }}</h1>
+    {% if l.summary %}<div class="sub">{{ l.summary }}</div>{% endif %}
+  </div>
+  <div class="actions">
+    {% if current_user.is_admin or l.created_by_id == current_user.id %}<a class="btn" href="{{ url_for('coaching.lesson_edit', slug=l.slug) }}">{{ ui.icon("edit") }} Edit</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid {% if l.fen %}g-2{% endif %}" style="align-items:start;gap:28px">
+  {% if l.fen %}
+  <div class="card"><div class="card-b">
+    <div data-board data-fen="{{ l.fen }}" data-solution="{{ l.solution or '' }}" data-solution-text="{{ l.solution or '' }}"></div>
+  </div></div>
+  {% endif %}
+  <div class="stack">
+    <div class="card"><div class="card-b" style="padding:22px 24px"><div class="prose">{{ l.body|body }}</div></div></div>
+
+    {% if assignment %}
+    <form class="card card-accent" method="POST" action="{{ url_for('coaching.assignment_toggle', assignment_id=assignment.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="card-b row-between">
+        <div><div class="strong">Assigned by your coach</div>{% if assignment.note %}<div class="small muted">{{ assignment.note }}</div>{% endif %}</div>
+        <button class="btn btn-primary" type="submit">{{ ui.icon("check") }} Mark done</button>
+      </div>
+    </form>
+    {% endif %}
+
+    {% if siblings|length > 1 %}
+    <div class="card">
+      <div class="card-h"><h2>More in {{ cat.TRACK_LABELS[l.track] }}</h2></div>
+      <ul class="list small list-hover">
+        {% for s in siblings if s.id != l.id %}
+          <li><a class="cover" href="{{ url_for('coaching.lesson', slug=s.slug) }}"><span class="grow">{{ s.title }}</span><span class="meta">{{ ui.level_bars(s.level) }}</span></a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='coaching/board.js') }}"></script>{% endblock %}

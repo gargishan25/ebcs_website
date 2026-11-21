@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% set title = "East Bay Chess Society | Coaching Guidelines" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='coaching/app.css') }}">{% endblock %}
+{% block content %}
+<div class="cx-pub">
+  <div class="wrap" style="max-width:760px;padding:56px 0 80px">
+    <div class="kicker">EBCS Coaching</div>
+    <h1 style="font-family:var(--serif);font-size:44px;margin:0 0 14px;line-height:1">Community guidelines</h1>
+    <p class="muted" style="margin:0 0 28px;line-height:1.65">EBCS Coaching brings together people of every age. These rules keep it safe, respectful and worth everyone's time. They apply to learners, coaches and families.</p>
+
+    <div class="card" style="padding:26px 30px">
+      <div class="prose" style="max-width:none">
+        <p><strong>Everyone</strong></p>
+        <ul>
+          <li>Be kind and patient. Everyone here is learning, the coaches included.</li>
+          <li>Show up on time. If you can't make a session, cancel it on the platform at least 24 hours ahead.</li>
+          <li>No harassment, hateful language, or pressure to share personal information.</li>
+        </ul>
+        <p><strong>Communication</strong></p>
+        <ul>
+          <li>All messages between coaches and learners stay on the EBCS platform. EBCS staff can read every thread.</li>
+          <li>Coaches never ask learners for phone numbers, social media accounts or private contact details.</li>
+          <li>If a message makes you uncomfortable, use the <em>Report</em> link next to it, or email eastbaychesssociety@gmail.com.</li>
+        </ul>
+        <p><strong>Sessions</strong></p>
+        <ul>
+          <li>Online sessions use a meeting link shared on the platform.</li>
+          <li>Learners under 18 need a parent or guardian's consent to join. Their guardian's details are visible only to EBCS staff.</li>
+        </ul>
+        <p><strong>Coaches</strong></p>
+        <ul>
+          <li>File a session report within 48 hours. Your logged hours come from these reports.</li>
+          <li>Only log hours you actually worked. EBCS staff check every entry.</li>
+          <li>Tell EBCS staff right away about any safety concern.</li>
+        </ul>
+        <p>Breaking these guidelines can lead to removal from the program. Questions? Email <strong>eastbaychesssociety@gmail.com</strong>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

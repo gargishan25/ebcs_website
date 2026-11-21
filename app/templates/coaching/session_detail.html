@@ -1,0 +1,115 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.schedule" %}
+{% block title %}Session{% endblock %}
+{% block crumbs %}<a href="{{ url_for('coaching.schedule') }}">{{ "Sessions" if current_user.is_learner else "Schedule" }}</a><span class="sep">/</span><b>{{ s.starts_at|dt }}</b>{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div class="row" style="gap:14px;align-items:center">
+    {{ ui.datebox(s.starts_at) }}
+    <div>
+      <h1 style="font-size:28px">{{ p.learner.name if is_coach else p.coach.name }}</h1>
+      <div class="sub">{{ s.starts_at|dt("time") }} - {{ s.ends_at|dt("time") }} · {{ s.duration_min }} min · Online · {{ ui.status_pill("session", s.status) }}
+        {% if s.is_upcoming %}<span class="faint" data-countdown="{{ s.starts_at.isoformat() }}Z">{{ s.starts_at|rel }}</span>{% endif %}</div>
+    </div>
+  </div>
+  <div class="actions">
+    {% if s.status == "scheduled" and s.location and s.location.startswith("http") %}
+      <a class="btn btn-primary" href="{{ s.location }}" target="_blank" rel="noopener">{{ ui.icon("link") }} Join meeting</a>
+    {% endif %}
+    <a class="btn" href="{{ url_for('coaching.thread', pairing_id=p.id) }}">{{ ui.icon("message") }} Message</a>
+    {% if is_coach %}<a class="btn" href="{{ url_for('coaching.learner_file', user_id=p.learner_id) }}">{{ ui.icon("users") }} Learner file</a>{% endif %}
+  </div>
+</div>
+
+<div class="grid g-main">
+  <div class="stack">
+    {% if report_form %}
+    <form method="POST" class="card card-accent" novalidate>
+      {{ report_form.hidden_tag() }}
+      <div class="card-h"><h2>Session report</h2><span class="aside small muted">Takes a minute. Your hours count once it's filed.</span></div>
+      <div class="card-b">
+        {{ ui.choices(report_form.outcome) }}
+        <div class="f-row">{{ ui.field(report_form.minutes, inputmode="numeric") }}<div></div></div>
+        {{ ui.choices(report_form.topics) }}
+        {{ ui.field(report_form.summary, rows=4, placeholder="What you covered, what clicked, what still needs work.") }}
+        {{ ui.field(report_form.homework, rows=2, placeholder="Your learner will see this.") }}
+      </div>
+      <div class="card-f row"><button class="btn btn-primary" name="{{ report_form.submit.name }}" value="1" type="submit">{{ ui.icon("check") }} File report</button>
+        <span class="small muted">You can also assign library lessons from the learner file.</span></div>
+    </form>
+    {% elif s.status == "scheduled" %}
+    <div class="card"><div class="card-b">
+      <div class="eyebrow" style="margin-bottom:6px">Plan</div>
+      <div class="prose" style="font-size:14px">{{ s.agenda|body if s.agenda else "No plan written yet." }}</div>
+      {% if s.location and not s.location.startswith("http") %}<div class="small" style="margin-top:8px"><b>Where:</b> {{ s.location }}</div>{% endif %}
+    </div></div>
+    {% endif %}
+
+    {% if s.status == "completed" %}
+    <div class="card">
+      <div class="card-h"><h2>Coach's notes</h2><span class="aside small muted">filed {{ s.reported_at|dt("short") if s.reported_at }}</span></div>
+      <div class="card-b">
+        {% if s.topics %}<div class="tags" style="margin-bottom:10px">{% for t in s.topics %}<span class="tag">{{ skill_labels.get(t, t) }}</span>{% endfor %}</div>{% endif %}
+        <div class="prose" style="font-size:14px">{{ s.summary|body if s.summary else "No notes." }}</div>
+        {% if s.homework %}
+          <div class="hr"></div>
+          <div class="eyebrow" style="margin-bottom:4px">Homework</div>
+          <div class="prose" style="font-size:14px">{{ s.homework|body }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% elif s.status in ["cancelled", "no_show"] %}
+    <div class="card"><div class="card-b small muted">This session was {{ "cancelled" if s.status == "cancelled" else "marked as a no-show" }}{% if s.summary %}: “{{ s.summary }}”{% endif %}.</div></div>
+    {% endif %}
+
+    {% if feedback_form %}
+    <form method="POST" class="card" novalidate>
+      {{ feedback_form.hidden_tag() }}
+      <div class="card-h"><h2>How was it?</h2></div>
+      <div class="card-b">
+        <div class="f"><span class="lbl">Rating</span>
+          <div class="choices" style="grid-template-columns:repeat(5, 64px)">
+            {% for v, l in feedback_form.rating.choices %}
+              <div class="choice"><input type="radio" id="fr{{ v }}" name="{{ feedback_form.rating.name }}" value="{{ v }}"><label for="fr{{ v }}" style="justify-content:center">{{ v }}</label></div>
+            {% endfor %}
+          </div>
+          <div class="hint">1 = not helpful · 5 = really helpful</div>
+          {% for e in feedback_form.rating.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+        {{ ui.field(feedback_form.feedback, rows=2, hint="Optional. EBCS staff read these too.") }}
+      </div>
+      <div class="card-f"><button class="btn btn-primary" name="{{ feedback_form.submit.name }}" value="1" type="submit">Send feedback</button></div>
+    </form>
+    {% elif s.learner_rating %}
+    <div class="card"><div class="card-b row">
+      <span class="eyebrow">Learner rating</span>
+      <span class="strong num" style="font-size:18px">{{ s.learner_rating }}/5</span>
+      {% if s.learner_feedback and (is_coach or is_learner) %}<span class="small muted grow">“{{ s.learner_feedback }}”</span>{% endif %}
+    </div></div>
+    {% endif %}
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Details</h2></div>
+      <ul class="list small">
+        <li><span class="muted">Coach</span><span class="meta" style="color:var(--ink)">{{ p.coach.name }}</span></li>
+        <li><span class="muted">Learner</span><span class="meta" style="color:var(--ink)">{{ p.learner.name }}</span></li>
+        <li><span class="muted">Where</span><span class="meta" style="color:var(--ink);max-width:200px;overflow:hidden;text-overflow:ellipsis">{{ s.location or "-" }}</span></li>
+        <li><span class="muted">Session #</span><span class="meta mono">{{ p.sessions.index(s) + 1 }} of {{ p.sessions|length }}</span></li>
+      </ul>
+    </div>
+    {% if s.status == "scheduled" and s.is_upcoming %}
+    <form class="card" method="POST" action="{{ url_for('coaching.session_cancel', session_id=s.id) }}" data-confirm="Cancel this session? The other person will see it as cancelled.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="card-b">
+        <div class="f" style="margin-bottom:10px"><label>Can't make it?</label><input type="text" name="reason" placeholder="Reason (optional)"></div>
+        <button class="btn btn-danger btn-sm" type="submit">{{ ui.icon("x") }} Cancel session</button>
+        <div class="tiny faint" style="margin-top:6px">Please give at least 24 hours' notice.</div>
+      </div>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

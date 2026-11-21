@@ -1,0 +1,80 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div><h1>Program overview</h1><div class="sub">EBCS Coaching · {{ seats_free }} open coach seat{{ "s" if seats_free != 1 }}</div></div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('coaching.admin_coaches') }}">{{ ui.icon("knight") }} Coach pipeline</a>
+    <a class="btn btn-primary" href="{{ url_for('coaching.admin_learners') }}">{{ ui.icon("users") }} Match learners</a>
+  </div>
+</div>
+
+<div class="kpis" style="margin-bottom:16px">
+  {% for k in kpis %}
+  <div class="kpi {% if k.warn %}warn{% endif %}"><div class="k-label">{{ k.label }}</div><div class="k-value">{{ k.value }}</div><div class="k-sub">{{ k.sub }}</div></div>
+  {% endfor %}
+</div>
+
+<div class="grid g-main-wide">
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Matching queue</h2><span class="aside"><a class="btn btn-sm btn-ghost" href="{{ url_for('coaching.admin_learners') }}">View all</a></span></div>
+      {% if waiting %}
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr><th>Learner</th><th>Goals</th><th class="right">Hours free</th><th class="right">Waiting</th><th></th></tr></thead>
+        <tbody>
+        {% for l in waiting %}
+          <tr>
+            <td><div class="who">{{ ui.avatar(l.user) }}<div><b>{{ l.user.name }}</b><small>{{ cat.AGE_LABELS.get(l.age_band) }} · {{ cat.LEVEL_LABELS.get(l.level, "").split(" - ")[0] }}</small></div></div></td>
+            <td><div class="tags">{% for g in l.goals[:3] %}<span class="tag">{{ cat.FOCUS_LABELS[g] }}</span>{% endfor %}</div></td>
+            <td class="right num">{{ l.availability|length }}</td>
+            <td class="right num {% if l.waiting_days > 7 %}strong{% endif %}" style="{% if l.waiting_days > 7 %}color:var(--amber){% endif %}">{{ l.waiting_days }}d</td>
+            <td class="right"><a class="btn btn-sm btn-primary" href="{{ url_for('coaching.admin_match', user_id=l.user_id) }}">Match</a></td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+      {% else %}{{ ui.empty("Queue is clear", "Every learner has a coach.", "♔") }}{% endif %}
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Sessions completed per week</h2><span class="aside small muted">last 10 weeks</span></div>
+      <div class="card-b">{{ bars }}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Coach applications</h2><span class="aside"><a class="btn btn-sm btn-ghost" href="{{ url_for('coaching.admin_coaches') }}">Pipeline</a></span></div>
+      {% if applicants %}
+      <ul class="list list-hover">
+        {% for c in applicants %}
+        <li><a class="cover" href="{{ url_for('coaching.admin_coach', user_id=c.user_id) }}">
+          {{ ui.avatar(c.user) }}
+          <div class="grow"><div class="strong">{{ c.user.name }}</div><div class="small muted">{{ c.school }} · {{ c.grade }}th · <span class="num">{{ c.rating or "unrated" }}</span></div></div>
+          {{ ui.status_pill("coach", c.status) }}<span class="meta">{{ c.created_at|rel }}</span>
+        </a></li>
+        {% endfor %}
+      </ul>
+      {% else %}{{ ui.empty("No pending applications") }}{% endif %}
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Review queues</h2></div>
+      <a class="todo" href="{{ url_for('coaching.admin_hours') }}"><span class="ic ic-report">{{ ui.icon("clock") }}</span><span class="grow">Hours to confirm</span><span class="strong num">{{ pending_hours }}</span></a>
+      <a class="todo" href="{{ url_for('coaching.admin_messages') }}"><span class="ic {% if flagged %}ic-report{% else %}ic-assess{% endif %}">{{ ui.icon("shield") }}</span><span class="grow">Reported messages</span><span class="strong num" style="{% if flagged %}color:var(--red){% endif %}">{{ flagged }}</span></a>
+      <a class="todo" href="{{ url_for('coaching.admin_coaches') }}"><span class="ic ic-schedule">{{ ui.icon("knight") }}</span><span class="grow">Applications</span><span class="strong num">{{ applicants|length }}</span></a>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>Activity</h2><span class="aside"><a class="btn btn-sm btn-ghost" href="{{ url_for('coaching.admin_activity') }}">All</a></span></div>
+      <ul class="list small">
+        {% for e in events %}
+        <li style="align-items:flex-start"><span class="grow"><b>{{ e.actor.name if e.actor else "System" }}</b> {{ e.verb }}{% if e.subject %} <span class="muted">{{ e.subject }}</span>{% endif %}</span><span class="meta">{{ e.created_at|rel }}</span></li>
+        {% else %}<li class="muted">Nothing yet.</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

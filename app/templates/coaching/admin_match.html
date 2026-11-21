@@ -1,0 +1,104 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.admin_learners" %}
+{% block title %}Match {{ learner_user.name }}{% endblock %}
+{% block crumbs %}<a href="{{ url_for('coaching.admin_learners') }}">Learners</a><span class="sep">/</span><b>Match {{ learner_user.name }}</b>{% endblock %}
+{% block content %}
+{%- set active = learner.active_pairing() -%}
+<div class="cx-head">
+  <div class="row" style="gap:14px">
+    {{ ui.avatar(learner_user, "avatar-xl") }}
+    <div><h1>{{ learner_user.name }}</h1>
+      <div class="sub">{{ cat.AGE_LABELS.get(learner.age_band) }} · {{ cat.LEVEL_LABELS.get(learner.level, "").split(" - ")[0] }} · est. <span class="num">{{ learner.rating_estimate }}</span> · {{ learner.availability|length }} h free · waiting {{ learner.waiting_days }}d</div></div>
+  </div>
+</div>
+
+{% if active %}
+<div class="card" style="margin-bottom:16px"><div class="card-b row-between">
+  <span>Already matched with <b>{{ active.coach.name }}</b> since {{ active.created_at|dt("date") }}.</span>
+  <form method="POST" action="{{ url_for('coaching.admin_end_pairing', pairing_id=active.id) }}" data-confirm="End this pairing so you can rematch?">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="next" value="waiting"><input type="hidden" name="reason" value="Rematch">
+    <button class="btn btn-danger btn-sm">End pairing to rematch</button>
+  </form>
+</div></div>
+{% endif %}
+
+<div class="grid g-main-wide">
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Ranked coaches</h2><span class="aside small muted">{{ eligible|length }} eligible</span></div>
+      {% for r in eligible %}
+        {%- set c = r.coach -%}
+        <div class="match">
+          <div class="score {% if r.total >= 70 %}{% elif r.total >= 50 %}mid{% else %}low{% endif %}">{{ r.total }}</div>
+          <div>
+            <div class="row"><a class="strong" href="{{ url_for('coaching.admin_coach', user_id=c.user_id) }}">{{ c.user.name }}</a>
+              <span class="num small muted">{{ c.rating or "unrated" }}</span><span class="small muted">· {{ c.load }}/{{ c.max_learners }} learners</span>
+              {% if loop.first %}<span class="pill pill-gold no-dot">Best fit</span>{% endif %}</div>
+            <div class="small muted" style="margin:2px 0 6px">Shared: {{ r.shared_label }}</div>
+            <div class="tags">{% for s in c.specialties %}<span class="tag {% if s in learner.goals %}tag-hit{% endif %}">{{ cat.FOCUS_LABELS[s] }}</span>{% endfor %}</div>
+            {% if r.notes %}<ul class="notes">{% for n in r.notes %}<li>{{ n }}</li>{% endfor %}</ul>{% endif %}
+          </div>
+          <div class="meters">
+            {% for key, w in weights.items() %}
+            <div class="meter"><span>{{ key|capitalize }}</span><span class="track"><i style="width:{{ (r.parts[key] / w * 100)|round }}%"></i></span><span class="v">{{ r.parts[key] }}/{{ w }}</span></div>
+            {% endfor %}
+          </div>
+          <div class="act">
+            {% if not active %}
+            <form method="POST" data-confirm="Match {{ learner_user.first_name }} with {{ c.user.name }}? Both will see each other and a message thread opens.">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="coach_id" value="{{ c.user_id }}">
+              <button class="btn btn-primary" type="submit">Match</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        {{ ui.empty("No eligible coaches", "Nobody has a free roster spot with overlapping hours. Ask the learner to widen their availability, or approve more coaches.") }}
+      {% endfor %}
+    </div>
+
+    {% if ineligible %}
+    <div class="card">
+      <div class="card-h"><h2>Not eligible</h2><span class="aside small muted">{{ ineligible|length }}</span></div>
+      <ul class="list small">
+        {% for r in ineligible %}
+        <li>{{ ui.avatar(r.coach.user) }}<span class="grow"><b>{{ r.coach.user.name }}</b> <span class="muted">{{ r.blockers|join(" · ") }}</span></span><span class="meta num">{{ r.total }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Learner</h2></div>
+      <div class="card-b small">
+        <div class="eyebrow" style="margin-bottom:6px">Goals</div>
+        <div class="tags" style="margin-bottom:10px">{% for g in learner.goals %}<span class="tag tag-hit">{{ cat.FOCUS_LABELS[g] }}</span>{% else %}<span class="faint">None</span>{% endfor %}</div>
+        {% if learner.goal_text %}<p class="muted">“{{ learner.goal_text }}”</p>{% endif %}
+        {% if learner.is_minor %}<div class="eyebrow" style="margin:10px 0 4px">Guardian</div><div>{{ learner.guardian_name }} · {{ learner.guardian_email }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Availability</h2>{% if eligible %}<span class="aside tiny muted">vs {{ eligible[0].coach.user.first_name }}</span>{% endif %}</div>
+      <div class="card-b">
+        {% if eligible %}
+          {{ ui.avail_grid("x", learner.availability, editable=False, shared=eligible[0].shared_slots, compare=eligible[0].coach.availability) }}
+        {% else %}
+          {{ ui.avail_grid("x", learner.availability, editable=False) }}
+        {% endif %}
+      </div>
+    </div>
+    <div class="card"><div class="card-b tiny muted">
+      Score = availability 40 + strength 25 + focus 25 + capacity 10. The score is advice, not a decision. Use your judgement, for example about age gaps, personalities and past history.
+    </div></div>
+    {% if history %}
+    <div class="card"><div class="card-h"><h2>Past pairings</h2></div>
+      <ul class="list small">{% for p in history %}<li><span class="grow">{{ p.coach.name }}</span>{{ ui.status_pill("learner", "matched") if p.status == "active" else "" }}<span class="meta">{{ p.end_reason or "" }} {{ p.created_at|dt("date") }}</span></li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

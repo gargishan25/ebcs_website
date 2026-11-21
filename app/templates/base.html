@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  {% block head %}{% endblock %}
 </head>
 <body>
   <header class="site-header">
@@ -21,10 +22,13 @@
       <nav class="site-nav">
         <a class="{{ 'active' if active_page == 'home' else '' }}" href="{{ url_for('main.home') }}">Home</a>
         <a class="{{ 'active' if active_page == 'team' else '' }}" href="{{ url_for('main.team') }}">Team</a>
+        {# ARCHIVED (Nov 2026): tournament nav link. The /events/ route is commented out in app/routes.py,
+           so url_for('main.tournaments') would crash if this ran. Uncomment both together to restore.
         <a class="{{ 'active' if active_page == 'tournaments' else '' }}" href="{{ url_for('main.tournaments') }}">Events</a>
+        #}
         <a class="{{ 'active' if active_page == 'sponsors' else '' }}" href="{{ url_for('main.sponsors') }}">Sponsors</a>
         {% if coaching_enabled %}
-          <a class="nav-cta {{ 'active' if active_page == 'coaching' else '' }}" href="{{ url_for('main.coaching_home') }}">Coaching</a>
+          <a class="nav-cta {{ 'active' if active_page == 'coaching' else '' }}" href="{{ url_for('coaching.landing') }}">Coaching</a>
         {% endif %}
       </nav>
     </div>

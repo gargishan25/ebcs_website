@@ -1,0 +1,26 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Activity log{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Activity log</h1><div class="sub">Every match, review, report and status change, newest first.</div></div></div>
+<div class="card">
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>When</th><th>Who</th><th>Action</th><th>Detail</th></tr></thead>
+    <tbody>
+    {% for e in events.items %}
+      <tr><td class="nowrap small">{{ e.created_at|dt }}</td><td>{% if e.actor %}<div class="who">{{ ui.avatar(e.actor) }}<span>{{ e.actor.name }} <span class="faint tiny">{{ e.actor.role }}</span></span></div>{% else %}System{% endif %}</td>
+        <td>{{ e.verb }}</td><td class="small muted">{{ e.subject }}</td></tr>
+    {% else %}
+      <tr><td colspan="4">{{ ui.empty("Nothing logged yet") }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% if events.pages > 1 %}
+  <div class="card-f row">
+    {% if events.has_prev %}<a class="btn btn-sm" href="{{ url_for('coaching.admin_activity', page=events.prev_num) }}">← Newer</a>{% endif %}
+    <span class="small muted">Page {{ events.page }} of {{ events.pages }}</span>
+    {% if events.has_next %}<a class="btn btn-sm" href="{{ url_for('coaching.admin_activity', page=events.next_num) }}">Older →</a>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

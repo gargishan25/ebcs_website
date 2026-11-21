@@ -1,0 +1,67 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Application{% endblock %}
+{% block content %}
+{%- set order = ["applied", "screening", "approved"] -%}
+{%- set idx = order.index(profile.status) if profile.status in order else -1 -%}
+<div class="cx-head">
+  <div>
+    <h1>Your application</h1>
+    <div class="sub">Submitted {{ profile.created_at|dt("date") }} · {{ ui.status_pill("coach", profile.status) }}</div>
+  </div>
+</div>
+
+<div class="grid g-main">
+  <div class="stack">
+    <div class="card">
+      <div class="card-b" style="padding:22px">
+        {% if profile.status in ["rejected"] %}
+          <h2 style="font-size:16px;margin-bottom:6px">We're not able to add you as a coach right now</h2>
+          <p class="muted small">Thank you for applying. This usually comes down to the number of coaches we can support, or rating verification. Email eastbaychesssociety@gmail.com if you'd like feedback or want to reapply later.</p>
+        {% elif profile.status == "paused" %}
+          <h2 style="font-size:16px;margin-bottom:6px">Your coaching is paused</h2>
+          <p class="muted small">EBCS staff have paused your account, so you won't get new learners for now. Email eastbaychesssociety@gmail.com to resume.</p>
+        {% else %}
+          <div class="steps">
+            <div class="step {% if idx > 0 %}done{% elif idx == 0 %}now{% endif %}">Submitted</div>
+            <div class="step {% if idx > 1 %}done{% elif idx == 1 %}now{% endif %}">Screening</div>
+            <div class="step">Approved</div>
+            <div class="step">First learner</div>
+          </div>
+          <div class="hr"></div>
+          {% if profile.status == "applied" %}
+            <p class="small"><b>Next:</b> EBCS staff will check your rating and read your answers, usually within a week.</p>
+          {% else %}
+            <p class="small"><b>Screening:</b> a staff member may email you to arrange a short chat or a demo lesson. Keep an eye on {{ current_user.email }}.</p>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h2>What you submitted</h2></div>
+      <ul class="list">
+        <li><span class="muted small" style="width:140px">School</span><span>{{ profile.school }}, {{ profile.grade }}th grade</span></li>
+        <li><span class="muted small" style="width:140px">USCF</span><span class="num">{{ profile.uscf_rating or "-" }}{% if profile.uscf_id %} <span class="faint mono">#{{ profile.uscf_id }}</span>{% endif %}</span></li>
+        <li><span class="muted small" style="width:140px">Online</span><span class="num">{% if profile.online_rating %}{{ profile.online_rating }} on {{ profile.online_platform or "?" }}{% if profile.online_username %} ({{ profile.online_username }}){% endif %}{% else %}-{% endif %}</span></li>
+        <li style="align-items:flex-start"><span class="muted small" style="width:140px">Specialties</span><div class="tags">{% for s in profile.specialties %}<span class="tag">{{ cat.FOCUS_LABELS[s] }}</span>{% endfor %}</div></li>
+        <li><span class="muted small" style="width:140px">Roster</span><span>Up to {{ profile.max_learners }} learner{{ "s" if profile.max_learners != 1 }}</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h2>Get ready</h2></div>
+      <div class="card-b small">
+        <p>While you wait, explore the lesson library. These are the lessons you'll assign to learners.</p>
+        <a class="btn btn-sm" href="{{ url_for('coaching.library') }}">{{ ui.icon("book") }} Open library</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Availability</h2><div class="aside"><a class="btn btn-sm" href="{{ url_for('coaching.settings') }}">Edit</a></div></div>
+      <div class="card-b">{{ ui.avail_grid("x", profile.availability, editable=False) }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}

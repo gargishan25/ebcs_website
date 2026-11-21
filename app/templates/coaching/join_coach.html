@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set title = "East Bay Chess Society | Apply to coach" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='coaching/app.css') }}">{% endblock %}
+{% block content %}
+<div class="cx-pub">
+  <div class="wrap cx-form-wrap">
+    <aside class="cx-form-nav">
+      <div class="kicker">Coach application</div>
+      <h1>Apply to coach</h1>
+      <p>For high-school students. Applications are reviewed by EBCS staff, usually within a week. You'll be able to track yours after you submit.</p>
+      <ol>
+        <li><a href="#s-account" class="on">Account</a></li>
+        <li><a href="#s-school">School</a></li>
+        <li><a href="#s-strength">Playing strength</a></li>
+        <li><a href="#s-teach">Teaching</a></li>
+        <li><a href="#s-time">Availability</a></li>
+        <li><a href="#s-agree">Code of conduct</a></li>
+      </ol>
+    </aside>
+
+    <form method="POST" class="cx-form" data-signup novalidate>
+      {{ form.hidden_tag() }}
+      {% if form.errors %}<div class="cx-flash error">A few things need fixing. They're marked below.</div>{% endif %}
+
+      <section class="sec" id="s-account">
+        <h2>Account</h2>
+        <p class="sec-sub">Learners only see your name and bio. Your email and phone are never shown to them.</p>
+        {{ ui.field(form.name, autocomplete="name") }}
+        {{ ui.field(form.email, autocomplete="email") }}
+        <div class="f-row">
+          {{ ui.field(form.password, autocomplete="new-password") }}
+          {{ ui.field(form.confirm, autocomplete="new-password") }}
+        </div>
+      </section>
+
+      <section class="sec" id="s-school">
+        <h2>School</h2>
+        <p class="sec-sub">Helps us get to know you and plan where coaches are needed.</p>
+        <div class="f-row">
+          {{ ui.field(form.school, placeholder="e.g. Mission San Jose High") }}
+          {{ ui.field(form.phone, hint="Optional. Only EBCS staff can see it.", autocomplete="tel") }}
+        </div>
+        {{ ui.choices(form.grade) }}
+      </section>
+
+      <section class="sec" id="s-strength">
+        <h2>Playing strength</h2>
+        <p class="sec-sub">Give at least one rating. We check them before approving you.</p>
+        <div class="f-row">
+          {{ ui.field(form.uscf_id, placeholder="8 digits") }}
+          {{ ui.field(form.uscf_rating, inputmode="numeric", placeholder="Regular rating") }}
+        </div>
+        <div class="f-row">
+          {{ ui.field(form.online_platform) }}
+          {{ ui.field(form.online_username) }}
+          {{ ui.field(form.online_rating, inputmode="numeric") }}
+        </div>
+      </section>
+
+      <section class="sec" id="s-teach">
+        <h2>Teaching</h2>
+        <p class="sec-sub">There are no wrong answers. We want to understand how you'd help someone improve.</p>
+        {{ ui.choices(form.specialties, hint="We use these to match you with learners' goals.") }}
+        {{ ui.field(form.experience, rows=4, placeholder="Tournaments, clubs, anyone you've taught or helped before...") }}
+        {{ ui.field(form.why, rows=3) }}
+        {{ ui.field(form.bio, rows=2, hint="Learners see this after you're matched. Keep it friendly and short.") }}
+      </section>
+
+      <section class="sec" id="s-time">
+        <h2>Availability</h2>
+        <p class="sec-sub">Mark the hours you can usually coach each week, in Pacific time.</p>
+        <div class="f" style="max-width:240px">{{ form.max_learners.label }}{{ form.max_learners() }}<div class="hint">You can change this later. Most coaches start with 1 or 2.</div></div>
+        <div class="f {% if form.availability.errors %}has-err{% endif %}">
+          <span class="lbl">{{ form.availability.label.text }}</span>
+          {{ ui.avail_grid("availability", form.availability.data) }}
+          {% for e in form.availability.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+      </section>
+
+      <section class="sec" id="s-agree">
+        <h2>Code of conduct</h2>
+        <div class="prose small" style="max-width:none">
+          <ul>
+            <li>Keep all communication with learners on the EBCS platform. Don't exchange personal phone numbers or social media.</li>
+            <li>Show up on time. If you have to cancel, give at least 24 hours' notice.</li>
+            <li>File a session report within 48 hours. That report is how your hours get logged.</li>
+            <li>Be patient and encouraging, and tell EBCS staff right away if anything feels wrong.</li>
+          </ul>
+        </div>
+        <div class="f {% if form.conduct.errors %}has-err{% endif %}">
+          <label class="check">{{ form.conduct() }} <span>{{ form.conduct.label.text }}</span></label>
+          {% for e in form.conduct.errors %}<div class="err">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="submit-bar">
+          <button class="btn btn-primary btn-lg" type="submit">Submit application</button>
+          <span class="small muted">Already applied? <a class="link" href="{{ url_for('coaching.login') }}">Sign in</a></span>
+        </div>
+      </section>
+    </form>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='coaching/app.js') }}" defer></script>
+{% endblock %}

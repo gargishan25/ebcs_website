@@ -1,0 +1,62 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}{{ "Sessions" if current_user.is_learner else "Schedule" }}{% endblock %}
+{% block content %}
+<div class="cx-head">
+  <div>
+    <h1>{{ "Sessions" if current_user.is_learner else "Schedule" }}</h1>
+    <div class="sub">{{ range_label }} · Pacific time{% if not current_user.is_admin and avail %} · shaded hours are your availability{% endif %}</div>
+  </div>
+  <div class="actions">
+    <div class="seg">
+      <a href="{{ url_for('coaching.schedule', w=offset-1) }}" aria-label="Previous week">←</a>
+      <a href="{{ url_for('coaching.schedule') }}" class="{% if offset == 0 %}on{% endif %}">This week</a>
+      <a href="{{ url_for('coaching.schedule', w=offset+1) }}" aria-label="Next week">→</a>
+    </div>
+    <a class="btn" href="{{ url_for('coaching.calendar_ics') }}">{{ ui.icon("download") }} Export .ics</a>
+    {% if can_schedule %}<a class="btn btn-primary" href="{{ url_for('coaching.session_new') }}">{{ ui.icon("plus") }} New session</a>{% endif %}
+  </div>
+</div>
+
+<div class="cal" style="--hour:52px">
+  <div class="cal-hd"></div>
+  {% for name, num, iso in days %}
+    <div class="cal-hd {% if today_idx == loop.index0 %}today{% endif %}"><div class="dn">{{ name }}</div><div class="dd">{{ num }}</div></div>
+  {% endfor %}
+
+  <div class="cal-times">{% for h in hours %}<div>{{ cat.hour_label(h) }}</div>{% endfor %}</div>
+  {% for name, num, iso in days %}
+    {%- set di = loop.index0 -%}
+    <div class="cal-col {% if today_idx == di %}today{% endif %}">
+      {% for h in hours %}
+        {%- set key = di ~ "-" ~ h -%}
+        {% if can_schedule and not current_user.is_admin %}
+          <a class="slot {% if key in avail %}av{% endif %}" href="{{ url_for('coaching.session_new', date=iso, hour=h) }}" title="Schedule {{ name }} {{ cat.hour_label(h) }}"></a>
+        {% else %}
+          <span class="slot {% if key in avail %}av{% endif %}"></span>
+        {% endif %}
+      {% endfor %}
+      {% for b in blocks if b.day == di %}
+        <a class="cal-ev {{ b.s.status }} {% if b.s.needs_report %}overdue{% endif %}" href="{{ url_for('coaching.session_detail', session_id=b.s.id) }}"
+           style="top:calc(var(--hour) * {{ b.top / 60 }});height:calc(var(--hour) * {{ b.height / 60 }} - 2px)">
+          <b>{{ b.who }}</b>
+          <small>{{ b.label }}{% if current_user.is_admin %} · {{ b.coach }}{% endif %}{% if b.s.needs_report %} · report due{% endif %}</small>
+        </a>
+      {% endfor %}
+      {% if now_line is not none and today_idx == di %}<div class="cal-now" style="top:calc(var(--hour) * {{ now_line / 60 }})"></div>{% endif %}
+    </div>
+  {% endfor %}
+</div>
+
+<div class="row small muted" style="margin-top:12px;gap:16px">
+  <span><span class="pill pill-blue">Scheduled</span></span>
+  <span><span class="pill pill-green">Completed</span></span>
+  <span><span class="pill pill-amber">Report due</span></span>
+  <span><span class="pill">Cancelled</span></span>
+  {% if can_schedule and not current_user.is_admin %}<span class="grow right">Tip: click any empty hour to schedule a session there.</span>{% endif %}
+</div>
+
+{% if not blocks %}
+<div class="card" style="margin-top:16px">{{ ui.empty("Nothing on the calendar this week", "Use the arrows to look at other weeks." if offset == 0 else "") }}</div>
+{% endif %}
+{% endblock %}

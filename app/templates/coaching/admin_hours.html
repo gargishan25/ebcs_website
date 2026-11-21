@@ -1,0 +1,50 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Hours supported{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Confirm hours supported</h1><div class="sub">Check that logged time looks right. This is for internal tracking only. Session entries link to the filed report.</div></div></div>
+
+<form method="POST" class="card" style="margin-bottom:16px">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="card-h">
+    <label class="check" style="margin:0"><input type="checkbox" data-check-all> <span class="strong">Pending</span></label>
+    <span class="small muted" data-check-count></span>
+    <div class="aside">
+      <button class="btn btn-sm btn-danger" name="action" value="rejected" data-needs-selection type="submit">Reject</button>
+      <button class="btn btn-sm btn-primary" name="action" value="verified" data-needs-selection type="submit">{{ ui.icon("check") }} Confirm selected</button>
+    </div>
+  </div>
+  {% if pending %}
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th style="width:34px"></th><th>Coach</th><th>Date</th><th>Type</th><th>Description</th><th class="right">Time</th><th>Evidence</th></tr></thead>
+    <tbody>
+    {% for e in pending %}
+      <tr>
+        <td><input type="checkbox" name="ids" value="{{ e.id }}" data-check-item></td>
+        <td><div class="who">{{ ui.avatar(e.coach) }}<b>{{ e.coach.name }}</b></div></td>
+        <td class="num nowrap">{{ e.worked_on.strftime("%b %-d") }}</td>
+        <td>{{ cat.HOUR_KIND_LABELS.get(e.kind) }}</td>
+        <td class="small">{{ e.description }}</td>
+        <td class="right num">{{ e.minutes|mins }}</td>
+        <td class="small">{% if e.session %}<a class="link" href="{{ url_for('coaching.session_detail', session_id=e.session_id) }}">Report</a>{% if e.session.learner_rating %} · <span class="num">{{ e.session.learner_rating }}/5</span>{% endif %}{% else %}<span class="faint">Self-reported</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{{ ui.empty("Nothing to confirm", "", "♔") }}{% endif %}
+</form>
+
+<div class="card">
+  <div class="card-h"><h2>Recently reviewed</h2></div>
+  {% if recent %}
+  <div class="tbl-wrap"><table class="tbl">
+    <tbody>
+    {% for e in recent %}
+      <tr><td><b>{{ e.coach.name }}</b></td><td class="small">{{ e.description }}</td><td class="right num">{{ e.minutes|mins }}</td><td>{{ ui.status_pill("hours", e.status) }}</td>
+        <td class="small muted right">{{ e.reviewed_by.first_name if e.reviewed_by }} · {{ e.reviewed_at|rel if e.reviewed_at }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{{ ui.empty("No reviews yet") }}{% endif %}
+</div>
+{% endblock %}

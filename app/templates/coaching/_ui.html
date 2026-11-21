@@ -1,0 +1,132 @@
+{# Shared macros for the coaching platform. Import with:
+   {% import "coaching/_ui.html" as ui %} #}
+
+{% macro icon(name) -%}
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if name == "home" -%}<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>
+{%- elif name == "calendar" -%}<rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/>
+{%- elif name == "users" -%}<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><path d="M16 4.8a3.3 3.3 0 0 1 0 6.4M18.5 14.8c1.6.8 2.6 2.4 3 5.2"/>
+{%- elif name == "message" -%}<path d="M4 5h16v11H9l-5 4z"/>
+{%- elif name == "book" -%}<path d="M4 4.5h6.5a2.5 2.5 0 0 1 2.5 2.5v13a2 2 0 0 0-2-2H4z"/><path d="M20 4.5h-6.5A2.5 2.5 0 0 0 11 7v13a2 2 0 0 1 2-2h7z"/>
+{%- elif name == "clock" -%}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+{%- elif name == "settings" -%}<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>
+{%- elif name == "shield" -%}<path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6z"/>
+{%- elif name == "activity" -%}<path d="M3 12h4l3-8 4 16 3-8h4"/>
+{%- elif name == "check" -%}<path d="m5 12.5 4.5 4.5L19 7.5"/>
+{%- elif name == "plus" -%}<path d="M12 5v14M5 12h14"/>
+{%- elif name == "arrow" -%}<path d="M5 12h14M13 6l6 6-6 6"/>
+{%- elif name == "left" -%}<path d="M15 6l-6 6 6 6"/>
+{%- elif name == "right" -%}<path d="M9 6l6 6-6 6"/>
+{%- elif name == "search" -%}<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>
+{%- elif name == "menu" -%}<path d="M4 7h16M4 12h16M4 17h16"/>
+{%- elif name == "link" -%}<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>
+{%- elif name == "flag" -%}<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>
+{%- elif name == "star" -%}<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>
+{%- elif name == "chart" -%}<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>
+{%- elif name == "logout" -%}<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>
+{%- elif name == "inbox" -%}<path d="M3 13.5 5.5 5h13l2.5 8.5V19H3z"/><path d="M3 13.5h5l1.5 2.5h5l1.5-2.5h5"/>
+{%- elif name == "knight" -%}<path d="M8 20h9M9 20c0-3 1-5 3.5-7L9 12l-2 1.5L5.5 11 9 6.5 9.5 4l2 1.5C16 6 18.5 9.5 17.5 20"/>
+{%- elif name == "download" -%}<path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/>
+{%- elif name == "edit" -%}<path d="M4 20h4L19 9l-4-4L4 16z"/>
+{%- elif name == "x" -%}<path d="M6 6l12 12M18 6 6 18"/>
+{%- elif name == "printer" -%}<path d="M7 9V3h10v6"/><rect x="3.5" y="9" width="17" height="8" rx="1.5"/><path d="M7 14h10v7H7z"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro avatar(user, size="") -%}
+<span class="avatar {{ size }} c{{ (user.id % 5) + 1 }}" title="{{ user.name }}">{{ user.initials }}</span>
+{%- endmacro %}
+
+{% macro status_pill(kind, value) -%}
+{%- set maps = {
+  "coach": {"applied": "blue", "screening": "amber", "approved": "green", "paused": "", "rejected": "red"},
+  "learner": {"waiting": "amber", "matched": "green", "paused": "", "graduated": "blue"},
+  "session": {"scheduled": "blue", "completed": "green", "cancelled": "", "no_show": "red"},
+  "hours": {"pending": "amber", "verified": "green", "rejected": "red"},
+} -%}
+{%- set labels = {
+  "coach": cat.COACH_STATUS_LABELS, "learner": cat.LEARNER_STATUS_LABELS,
+  "session": cat.SESSION_STATUS_LABELS, "hours": {"pending": "Pending", "verified": "Confirmed", "rejected": "Rejected"},
+} -%}
+<span class="pill {% if maps[kind][value] %}pill-{{ maps[kind][value] }}{% endif %}">{{ labels[kind].get(value, value) }}</span>
+{%- endmacro %}
+
+{% macro field(f, hint=None, cls="") -%}
+<div class="f {{ cls }} {% if f.errors %}has-err{% endif %}">
+  {{ f.label }}
+  {% if hint %}<div class="hint">{{ hint }}</div>{% endif %}
+  {{ f(**kwargs) }}
+  {% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro choices(f, hint=None, cols="", labels=None) -%}
+{# Renders RadioField / SelectMultipleField as selectable tiles #}
+{%- set multi = f.type == "SelectMultipleField" -%}
+<div class="f {% if f.errors %}has-err{% endif %}">
+  <span class="lbl">{{ f.label.text }}</span>
+  {% if hint %}<div class="hint">{{ hint }}</div>{% endif %}
+  <div class="choices {{ cols }}">
+    {% for value, label in f.choices %}
+      {%- set checked = (value in (f.data or [])) if multi else (f.data == value) -%}
+      <div class="choice">
+        <input type="{{ 'checkbox' if multi else 'radio' }}" id="{{ f.id }}-{{ loop.index }}" name="{{ f.name }}" value="{{ value }}" {% if checked %}checked{% endif %}>
+        <label for="{{ f.id }}-{{ loop.index }}">{{ labels[value] if labels else label }}</label>
+      </div>
+    {% endfor %}
+  </div>
+  {% for e in f.errors %}<div class="err">{{ e }}</div>{% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro avail_grid(name, selected, editable=True, shared=None, compare=None, label="Weekly availability") -%}
+{# Paintable weekly grid. selected/shared/compare are iterables of "day-hour" keys. #}
+{%- set sel = selected or [] -%}
+{%- set sh = shared or [] -%}
+{%- set cmp = compare or [] -%}
+<div class="avail {% if editable %}{% else %}avail-ro{% endif %}" {% if editable %}data-paint{% endif %}>
+  {% if editable %}
+  <div class="avail-tools">
+    <span class="small muted" data-avail-count></span>
+    <span class="grow"></span>
+    <button type="button" class="btn btn-sm btn-ghost" data-preset="evenings">+ Weekday evenings</button>
+    <button type="button" class="btn btn-sm btn-ghost" data-preset="weekends">+ Weekends</button>
+    <button type="button" class="btn btn-sm btn-ghost" data-preset="clear">Clear</button>
+  </div>
+  {% endif %}
+  <div class="avail-grid" role="group" aria-label="{{ label }}">
+    <div></div>
+    {% for d in cat.DAYS %}<div class="hd">{{ d }}</div>{% endfor %}
+    {% for h in cat.HOURS %}
+      <div class="hr-l">{{ cat.hour_label(h) }}</div>
+      {% for d in range(7) %}
+        {%- set key = d ~ "-" ~ h -%}
+        <div class="avail-cell {% if key in sh %}shared{% elif key in cmp and key not in sel %}mine{% endif %} {% if key in sel %}on{% endif %}">
+          {% if editable %}<input type="checkbox" name="{{ name }}" value="{{ key }}" {% if key in sel %}checked{% endif %} aria-label="{{ cat.DAYS[d] }} {{ cat.hour_label(h) }}">{% endif %}
+          <span></span>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+  {% if editable %}
+  <div class="avail-legend"><span><i style="background:var(--blue)"></i>Available</span><span>Click and drag to paint. Times are Pacific.</span></div>
+  {% elif sh %}
+  <div class="avail-legend"><span><i style="background:var(--gold)"></i>Shared</span><span><i style="background:var(--blue)"></i>Learner only</span><span><i style="background:#c9d9ef"></i>Coach only</span></div>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro level_bars(n) -%}
+<span class="lvl" title="Level {{ n }} of 4">{% for i in range(1, 5) %}<i class="{% if i <= n %}on{% endif %}"></i>{% endfor %}</span>
+{%- endmacro %}
+
+{% macro datebox(dt) -%}
+{%- set s = dt|dt("short") -%}{# e.g. "Thu Nov 20" #}
+{%- set parts = s.split(" ") -%}
+<div class="when"><span class="m">{{ parts[1] }}</span><span class="d">{{ parts[2] }}</span><span class="w">{{ parts[0] }}</span></div>
+{%- endmacro %}
+
+{% macro empty(title, text="", glyph="♞") -%}
+<div class="empty"><div class="glyph">{{ glyph }}&#xFE0E;</div><h3>{{ title }}</h3>{% if text %}<p class="small">{{ text }}</p>{% endif %}{{ caller() if caller }}</div>
+{%- endmacro %}

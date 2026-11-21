@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% set title = "East Bay Chess Society | Free Chess Coaching" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='coaching/app.css') }}">{% endblock %}
+{% block content %}
+<div class="cx-pub">
+
+  <section class="cx-pub-hero">
+    <div class="wrap grid-hero">
+      <div>
+        <div class="kicker">EBCS Coaching</div>
+        <h1>Free one-on-one chess coaching, taught by high schoolers who love the game.</h1>
+        <p class="lead">Anyone can sign up, at any age or level. We match you with a vetted high-school coach who fits your goals and schedule. Your coach tracks your progress, sets homework and plans each session around you. It never costs anything.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-lg" href="{{ url_for('coaching.join_learner') }}">Get a free coach</a>
+          <a class="btn btn-lg" href="{{ url_for('coaching.join_coach') }}">Apply to coach</a>
+          <a class="btn btn-ghost btn-lg" href="{{ url_for('coaching.login') }}">Sign in</a>
+        </div>
+      </div>
+
+      <div class="cx-preview" aria-hidden="true">
+        <div class="bar"><i></i><i></i><i></i></div>
+        <div class="body">
+          <div class="row-between"><span class="eyebrow">Next session</span><span class="pill pill-blue">Online</span></div>
+          <div class="row" style="gap:14px">
+            <div class="when"><span class="m">Thu</span><span class="d">4:30</span><span class="w">pm</span></div>
+            <div><div class="strong">Endgames: the opposition</div><div class="small muted">with your coach · 60 min</div></div>
+          </div>
+          <div class="hr" style="margin:4px 0"></div>
+          <div class="row-between"><span class="eyebrow">Skill map</span><span class="small muted">last 30 days</span></div>
+          <div class="meters">
+            <div class="meter"><span>Tactics</span><span class="track"><i style="width:72%"></i></span><span class="v">3.6</span></div>
+            <div class="meter"><span>Endgames</span><span class="track"><i style="width:48%"></i></span><span class="v">2.4</span></div>
+            <div class="meter"><span>Openings</span><span class="track"><i style="width:60%"></i></span><span class="v">3.0</span></div>
+          </div>
+          <div class="hr" style="margin:4px 0"></div>
+          <div class="row-between small"><span>Homework: Knight fork</span><span class="pill pill-green">Done</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="cx-pub-stats">
+      <div><b class="num">{{ stats.coaches }}</b><span>approved coaches</span></div>
+      <div><b class="num">{{ stats.learners }}</b><span>learners signed up</span></div>
+      <div><b class="num">{{ stats.sessions }}</b><span>sessions taught</span></div>
+      <div><b class="num">{{ stats.hours }}</b><span>hours of coaching</span></div>
+    </div>
+  </div>
+
+  <section class="cx-pub-section">
+    <div class="wrap">
+      <h2>How it works</h2>
+      <p class="sec-lead">Each step is handled by a person, not an algorithm. Our software ranks the possible matches, and EBCS staff make every final pairing.</p>
+      <div class="cx-how">
+        <div><span class="n">01</span><h3>Tell us about you</h3><p>Your level, what you want to work on, and the hours you're free each week. Takes about three minutes.</p></div>
+        <div><span class="n">02</span><h3>Get matched</h3><p>We weigh shared availability, rating gap and coaching focus, then pair you with one coach.</p></div>
+        <div><span class="n">03</span><h3>Meet weekly</h3><p>Online, by video call. Your coach plans each session, files notes afterwards and sets homework.</p></div>
+        <div><span class="n">04</span><h3>Watch yourself improve</h3><p>Your skill map shows where you've grown across tactics, openings, endgames and more.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cx-pub-section" style="padding-top:0">
+    <div class="wrap cx-paths">
+      <div class="cx-path">
+        <div class="kicker">For learners</div>
+        <h3>Any age. Any level. Always free.</h3>
+        <p>Total beginners, kids, competitive juniors, and adults coming back to the game all get the same attention.</p>
+        <ul>
+          <li>A dedicated coach matched to your goals</li>
+          <li>Session notes and homework after every lesson</li>
+          <li>Interactive lessons and puzzles in your library</li>
+          <li>Parents and guardians stay informed for learners under 18</li>
+        </ul>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('coaching.join_learner') }}">Sign up as a learner</a>
+      </div>
+      <div class="cx-path dark">
+        <div class="kicker" style="color:var(--gold)">For high-school coaches</div>
+        <h3>Teach what you know. Make a real difference.</h3>
+        <p>If you're strong enough to teach and want to give back, we'll train you, support you, and document every hour you put in.</p>
+        <ul>
+          <li>Track every hour you spend supporting learners</li>
+          <li>Real teaching and mentorship experience for applications</li>
+          <li>Lesson plans, a puzzle library and tools that do the paperwork</li>
+          <li>Set your own roster size and weekly hours</li>
+        </ul>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('coaching.join_coach') }}">Apply to coach</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="cx-pub-section" style="padding-top:0">
+    <div class="wrap">
+      <h2>Questions</h2>
+      <div class="cx-faq">
+        <details><summary>Is it really free?</summary><p>Yes. EBCS is a student-led initiative and our coaches volunteer their time. There are no fees, ever.</p></details>
+        <details><summary>Who are the coaches?</summary><p>High-school players with a verified USCF or online rating. Every applicant is reviewed and approved by EBCS staff before taking on learners.</p></details>
+        <details><summary>How do you keep younger learners safe?</summary><p>Learners under 18 need parent or guardian consent. All sessions are online. All coach messages stay on the platform, where EBCS staff can review them. <a class="link" href="{{ url_for('coaching.guidelines') }}">Read our guidelines.</a></p></details>
+        <details><summary>How long until I get a coach?</summary><p>It depends on how many coaches are free at your times. The more hours you mark as available, the faster we can match you. You'll see your place in the queue on your dashboard.</p></details>
+        <details><summary>How strong do I need to be to coach?</summary><p>There's no fixed cutoff. We look for a solid rating, clear communication and reliability. Your learners just need you to be meaningfully stronger than them.</p></details>
+        <details><summary>Do you track coaching hours?</summary><p>Yes. Each session you report is logged automatically, so you and EBCS can both see how many hours you've spent supporting learners.</p></details>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

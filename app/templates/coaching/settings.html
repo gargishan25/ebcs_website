@@ -1,0 +1,40 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Settings</h1><div class="sub">{{ current_user.email }}</div></div></div>
+
+<div class="grid g-main">
+  <div class="stack">
+    {% if form %}
+    <form class="card" method="POST" novalidate>
+      {{ form.hidden_tag() }}
+      <div class="card-h"><h2>Availability</h2><span class="aside small muted">Used for matching and the schedule</span></div>
+      <div class="card-b">
+        {{ ui.avail_grid("availability", form.availability.data) }}
+        {% if current_user.is_coach %}
+          <div class="f" style="margin-top:18px"><label for="bio">Bio learners see</label><textarea id="bio" name="bio" rows="3" maxlength="600">{{ profile.bio or "" }}</textarea></div>
+        {% endif %}
+      </div>
+      <div class="card-f"><button class="btn btn-primary" name="submit" value="1" type="submit">Save</button></div>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="stack">
+    <form class="card" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="action" value="password">
+      <div class="card-h"><h2>Password</h2></div>
+      <div class="card-b">
+        <div class="f"><label>Current password</label><input type="password" name="current" autocomplete="current-password" required></div>
+        <div class="f"><label>New password</label><input type="password" name="new" autocomplete="new-password" minlength="8" required></div>
+      </div>
+      <div class="card-f"><button class="btn" type="submit">Update password</button></div>
+    </form>
+    <div class="card"><div class="card-b small muted">
+      To change your name or email, or to delete your account, email <b>eastbaychesssociety@gmail.com</b>.
+    </div></div>
+  </div>
+</div>
+{% endblock %}
