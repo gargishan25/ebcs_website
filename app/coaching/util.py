@@ -164,24 +164,26 @@ def radar_svg(axes, values, size=260, previous=None):
     return Markup("".join(parts))
 
 
-def bars_svg(values, labels, height=96, unit=""):
-    """Compact column chart. Highlights the last bar."""
-    w_bar, gap = 18, 8
-    width = len(values) * (w_bar + gap) - gap
+def bars_svg(values, labels, height=78, unit=""):
+    """Compact column chart. Highlights the last bar. The bars stretch to fit
+    the card; the date labels are plain HTML underneath so text never
+    stretches or overlaps."""
+    slot, w_bar = 26, 18
+    width = len(values) * slot
     top = max(values) if values and max(values) > 0 else 1
-    plot_h = height - 18
-    parts = [f'<svg class="bars" viewBox="0 0 {width} {height}" preserveAspectRatio="none" role="img">']
+    parts = [f'<div class="bars-wrap"><svg class="bars" viewBox="0 0 {width} {height}" '
+             f'preserveAspectRatio="none" role="img">']
     for i, v in enumerate(values):
-        h = max(2, plot_h * v / top) if v else 2
-        x = i * (w_bar + gap)
+        h = max(2, height * v / top) if v else 2
+        x = i * slot + (slot - w_bar) / 2
         cls = "bar bar-now" if i == len(values) - 1 else "bar"
         parts.append(
-            f'<rect class="{cls}" x="{x}" y="{plot_h - h:.1f}" width="{w_bar}" height="{h:.1f}" rx="2">'
+            f'<rect class="{cls}" x="{x}" y="{height - h:.1f}" width="{w_bar}" height="{h:.1f}" rx="2">'
             f"<title>{escape(labels[i])}: {v}{unit}</title></rect>"
         )
-        parts.append(f'<text class="bar-label" x="{x + w_bar / 2}" y="{height - 4}" text-anchor="middle">'
-                     f"{escape(labels[i])}</text>")
-    parts.append("</svg>")
+    parts.append('</svg><div class="bar-labels">')
+    parts.extend(f"<span>{escape(l)}</span>" for l in labels)
+    parts.append("</div></div>")
     return Markup("".join(parts))
 
 

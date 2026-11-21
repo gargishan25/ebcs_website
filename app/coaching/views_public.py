@@ -20,8 +20,12 @@ def _email(raw):
 @bp.route("/")
 def landing():
     stats = {
-        "coaches": CoachProfile.query.filter_by(status="approved").count(),
-        "learners": len({uid for (uid,) in db.session.query(LearnerProfile.user_id).all()} - unverified_ids()),
+        # deactivated and unverified accounts (e.g. tests) are left out
+        "coaches": (CoachProfile.query.join(User, CoachProfile.user_id == User.id)
+                    .filter(CoachProfile.status == "approved", User.disabled.isnot(True)).count()),
+        "learners": len({uid for (uid,) in db.session.query(LearnerProfile.user_id)
+                         .join(User, LearnerProfile.user_id == User.id)
+                         .filter(User.disabled.isnot(True)).all()} - unverified_ids()),
         "sessions": Session.query.filter_by(status="completed").count(),
         "hours": int((db.session.query(func.coalesce(func.sum(HourEntry.minutes), 0))
                       .filter(HourEntry.status == "verified").scalar() or 0) / 60),
