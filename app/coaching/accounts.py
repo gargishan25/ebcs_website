@@ -75,6 +75,7 @@ def check_code(user, code):
         row.code_hash = None
         log_event(user, "verified email", user.name)
         db.session.commit()
+        send_welcome(user)
         notify_admin_signup(user)
         return "ok"
     row.attempts = (row.attempts or 0) + 1
@@ -83,6 +84,18 @@ def check_code(user, code):
 
 
 # ----------------------------------------------------------- notifications ---
+def send_welcome(user):
+    link = absolute_url("coaching.app_home")
+    if user.is_coach:
+        send_email(user.email, "We got your coaching application",
+                   f"Hi {user.first_name}, thanks for applying to coach with EBCS. We'll review your application "
+                   f"and get in touch at this email. You can sign in any time to check its status: {link}")
+    else:
+        send_email(user.email, "Welcome to EBCS Coaching",
+                   f"Hi {user.first_name}, your account is all set. We’ll match you with a coach after reviewing "
+                   f"your application. You can sign in any time to see your status: {link}.")
+
+
 def notify_admin_signup(user):
     to = current_app.config.get("ADMIN_EMAIL")
     if not to:
