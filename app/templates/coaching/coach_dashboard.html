@@ -8,6 +8,7 @@
     <div class="sub">{{ roster|length }} of {{ profile.max_learners }} roster spots filled · {{ profile.school }}</div>
   </div>
   <div class="actions">
+    <a class="btn" href="{{ url_for('coaching.settings') }}">{{ ui.icon("clock") }} Edit my availability</a>
     <a class="btn" href="{{ url_for('coaching.schedule') }}">{{ ui.icon("calendar") }} Schedule</a>
     {% if roster %}<a class="btn btn-primary" href="{{ url_for('coaching.session_new') }}">{{ ui.icon("plus") }} New session</a>{% endif %}
   </div>

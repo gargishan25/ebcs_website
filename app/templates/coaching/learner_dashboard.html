@@ -7,6 +7,9 @@
     <h1>Hi, {{ current_user.first_name }}</h1>
     <div class="sub">{% if pairing %}You're working with {{ pairing.coach.name }}.{% else %}Welcome to EBCS Coaching.{% endif %}</div>
   </div>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('coaching.settings') }}">{{ ui.icon("clock") }} Edit my availability</a>
+  </div>
 </div>
 
 {% if not pairing %}
