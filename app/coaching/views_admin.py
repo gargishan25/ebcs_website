@@ -10,7 +10,7 @@ from sqlalchemy import func
 from ..models import db
 from . import bp
 from .catalog import COACH_STATUSES
-from .forms import CoachReviewForm
+from .forms import AvailabilityForm, CoachReviewForm
 from .matching import WEIGHTS, rank
 from .models import (CoachProfile, Event, HourEntry, LearnerProfile, Message, Pairing, Session as CSession,
                      User, log_event)
@@ -284,3 +284,21 @@ def admin_delete_user(user_id):
     delete_account(user, current_user)
     flash("Account deleted.", "success")
     return redirect(url_for("coaching.admin_overview"))
+
+
+# ------------------------------------------------- admin edits availability ---
+@bp.route("/app/admin/users/<int:user_id>/availability", methods=["GET", "POST"])
+@admin_only
+def admin_edit_availability(user_id):
+    user = db.session.get(User, user_id) or abort(404)
+    profile = user.coach or user.learner or abort(404)
+    back = (url_for("coaching.admin_coach", user_id=user.id) if user.coach
+            else url_for("coaching.learner_file", user_id=user.id))
+    form = AvailabilityForm(obj=profile)
+    if form.validate_on_submit():
+        profile.availability = form.availability.data
+        log_event(current_user, "edited availability", user.name)
+        db.session.commit()
+        flash("Availability updated.", "success")
+        return redirect(back)
+    return render_template("coaching/admin_availability.html", user=user, form=form, back=back)

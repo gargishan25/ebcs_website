@@ -112,7 +112,7 @@
     </div>
 
     <div class="card">
-      <div class="card-h"><h2>Availability</h2></div>
+      <div class="card-h"><h2>Availability</h2>{% if current_user.is_admin %}<span class="aside"><a class="btn btn-sm" href="{{ url_for('coaching.admin_edit_availability', user_id=learner.id) }}">Edit</a></span>{% endif %}</div>
       <div class="card-b">
         {%- set coach_av = pairing.coach.coach.availability if pairing and pairing.coach.coach else [] -%}
         {{ ui.avail_grid("x", profile.availability, editable=False, shared=profile.availability|select("in", coach_av)|list, compare=coach_av) }}

@@ -103,7 +103,8 @@
     {% endif %}
     {% endif %}
     <div class="card">
-      <div class="card-h"><h2>Availability</h2><span class="aside small muted">{{ profile.availability|length }} h / week</span></div>
+      <div class="card-h"><h2>Availability</h2><span class="aside small muted">{{ profile.availability|length }} h / week
+        <a class="btn btn-sm" href="{{ url_for('coaching.admin_edit_availability', user_id=user.id) }}">Edit</a></span></div>
       <div class="card-b">{{ ui.avail_grid("x", profile.availability, editable=False) }}</div>
     </div>
   </div>

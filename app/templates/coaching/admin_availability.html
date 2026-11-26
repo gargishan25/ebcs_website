@@ -1,0 +1,15 @@
+{% extends "coaching/shell.html" %}
+{% import "coaching/_ui.html" as ui with context %}
+{% set active_nav = "coaching.admin_coaches" if user.coach else "coaching.admin_learners" %}
+{% block title %}Edit availability for {{ user.name }}{% endblock %}
+{% block crumbs %}<a href="{{ back }}">{{ user.name }}</a><span class="sep">/</span><b>Availability</b>{% endblock %}
+{% block content %}
+<div class="cx-head"><div><h1>Edit availability for {{ user.name }}</h1></div></div>
+<form class="card" method="POST" novalidate>
+  {{ form.hidden_tag() }}
+  <div class="card-b">
+    {{ ui.avail_grid("availability", form.availability.data) }}
+  </div>
+  <div class="card-f row"><button class="btn btn-primary" name="submit" value="1" type="submit">Save</button></div>
+</form>
+{% endblock %}
