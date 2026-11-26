@@ -97,6 +97,11 @@ class User(UserMixin, db.Model):
         return self.role == "admin"
 
     @property
+    def is_deleted(self):
+        """Deleted accounts are anonymized in place (see accounts.delete_account)."""
+        return (self.email or "").endswith("@deleted.invalid")
+
+    @property
     def is_coach(self):
         return self.role == "coach"
 

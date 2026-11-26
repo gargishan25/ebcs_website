@@ -150,6 +150,15 @@
         {% endif %}
       </div>
     </form>
+    {% if learner.disabled %}
+    <form class="card" method="POST" action="{{ url_for('coaching.admin_delete_user', user_id=learner.id) }}"
+          data-confirm="Permanently delete {{ learner.name }}? This erases their account and personal details. It can't be undone.">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="card-b">
+        <button class="btn btn-sm btn-danger" type="submit">Delete account permanently</button>
+      </div>
+    </form>
+    {% endif %}
     {% endif %}
     {% endif %}
   </div>

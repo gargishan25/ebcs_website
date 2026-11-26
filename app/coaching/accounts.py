@@ -12,7 +12,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..models import db
 from .mail import absolute_url, send_email
-from .models import EmailVerification, PasswordReset, User, log_event
+from .models import EmailVerification, Event, HourEntry, PasswordReset, SkillAssessment, User, log_event
 
 CODE_TTL = timedelta(minutes=15)
 RESET_TTL = timedelta(hours=1)
@@ -184,4 +184,39 @@ def set_active(user, active, actor):
     if user.learner:
         user.learner.status = "paused"  # out of the matching queue
     log_event(actor, "deactivated account", user.name)
+    db.session.commit()
+
+
+# ---------------------------------------------------------------- deletion ---
+DELETED_NAME = "Deleted user"
+
+
+def delete_account(user, actor):
+    """Permanently erase a (deactivated) person's account and personal details.
+
+    Shared history is KEPT so nobody else loses anything: sessions, session
+    notes, messages (safety record) and every logged/confirmed hour stay, now
+    shown under "Deleted user". Erased: name, email, password, coach
+    application / learner profile, skill ratings, verification and reset records.
+    """
+    old_name = user.name
+    for row in (user.coach, user.learner):
+        if row is not None:
+            db.session.delete(row)
+    SkillAssessment.query.filter_by(learner_id=user.id).delete()
+    EmailVerification.query.filter_by(user_id=user.id).delete()
+    PasswordReset.query.filter_by(user_id=user.id).delete()
+
+    # scrub the old name from text that mentions it (hours stay, minutes untouched)
+    if old_name:
+        for e in HourEntry.query.filter(HourEntry.description.contains(old_name)).all():
+            e.description = e.description.replace(old_name, DELETED_NAME)
+        for ev in Event.query.filter(Event.subject.contains(old_name)).all():
+            ev.subject = ev.subject.replace(old_name, DELETED_NAME)
+
+    user.name = DELETED_NAME
+    user.email = f"deleted-{user.id}@deleted.invalid"
+    user.set_password(secrets.token_urlsafe(32))  # nobody knows it; sign-in impossible
+    user.disabled = True
+    log_event(actor, "deleted account", DELETED_NAME)
     db.session.commit()

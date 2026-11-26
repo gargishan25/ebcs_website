@@ -14,7 +14,7 @@ from .forms import CoachReviewForm
 from .matching import WEIGHTS, rank
 from .models import (CoachProfile, Event, HourEntry, LearnerProfile, Message, Pairing, Session as CSession,
                      User, log_event)
-from .accounts import send_match_emails, set_active, unverified_ids
+from .accounts import delete_account, send_match_emails, set_active, unverified_ids
 from .util import bars_svg, local_to_utc, roles_required
 from .views_app import _week_start_local
 
@@ -272,3 +272,15 @@ def admin_set_active(user_id):
         abort(400)  # admins can't lock themselves (or each other) out from here
     set_active(user, request.form.get("action") == "reactivate", current_user)
     return redirect(request.referrer or url_for("coaching.admin_overview"))
+
+
+@bp.route("/app/admin/users/<int:user_id>/delete", methods=["POST"])
+@admin_only
+def admin_delete_user(user_id):
+    user = db.session.get(User, user_id) or abort(404)
+    # only after deactivation; never yourself or another admin
+    if user.id == current_user.id or user.is_admin or not user.disabled or user.is_deleted:
+        abort(400)
+    delete_account(user, current_user)
+    flash("Account deleted.", "success")
+    return redirect(url_for("coaching.admin_overview"))
