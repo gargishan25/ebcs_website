@@ -69,7 +69,7 @@ def check_code(user, code):
     if not row.expires_at or row.expires_at < _now():
         return "expired"
     if (row.attempts or 0) >= MAX_ATTEMPTS:
-        return "locked"
+        return "lock"
     if row.code_hash and check_password_hash(row.code_hash, (code or "").strip()):
         row.verified_at = _now()
         row.code_hash = None
