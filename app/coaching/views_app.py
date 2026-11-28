@@ -354,6 +354,29 @@ def session_detail(session_id):
                            report_form=report_form, feedback_form=feedback_form, skill_labels=SKILL_LABELS)
 
 
+@bp.route("/app/sessions/<int:session_id>/link", methods=["POST"])
+@login_required
+def session_link(session_id):
+    """Coach (or admin) sets/changes the meeting link, optionally for every
+    upcoming session with the same learner."""
+    s = _session_or_404(session_id)
+    p = s.pairing
+    if current_user.id != p.coach_id and not current_user.is_admin:
+        abort(403)
+    link = (request.form.get("location") or "").strip()[:240] or None
+    targets = [s]
+    if request.form.get("apply_all"):
+        now = datetime.utcnow()
+        targets += [x for x in p.sessions
+                    if x.id != s.id and x.status == "scheduled" and x.starts_at >= now]
+    for x in targets:
+        x.location = link
+    log_event(current_user, "updated meeting link", f"{p.learner.name} ({len(targets)} session(s))")
+    db.session.commit()
+    flash("Meeting link updated.", "success")
+    return redirect(url_for("coaching.session_detail", session_id=s.id))
+
+
 @bp.route("/app/sessions/<int:session_id>/cancel", methods=["POST"])
 @login_required
 def session_cancel(session_id):

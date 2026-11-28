@@ -100,6 +100,20 @@
         <li><span class="muted">Session #</span><span class="meta mono">{{ p.sessions.index(s) + 1 }} of {{ p.sessions|length }}</span></li>
       </ul>
     </div>
+    {% if is_coach and s.status == "scheduled" %}
+    <form class="card" method="POST" action="{{ url_for('coaching.session_link', session_id=s.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="card-h"><h2>Meeting link</h2></div>
+      <div class="card-b">
+        <div class="f" style="margin-bottom:10px">
+          <input type="url" name="location" value="{{ s.location or '' }}" placeholder="https://meet.google.com/..." aria-label="Meeting link">
+          <div class="hint">Create the link from your own Google account so you can let your learner in.</div>
+        </div>
+        <label class="check small" style="margin-bottom:12px"><input type="checkbox" name="apply_all" value="1" checked> <span>Also update all upcoming sessions with this learner</span></label>
+        <button class="btn btn-sm btn-primary" type="submit">Save link</button>
+      </div>
+    </form>
+    {% endif %}
     {% if s.status == "scheduled" and s.is_upcoming %}
     <form class="card" method="POST" action="{{ url_for('coaching.session_cancel', session_id=s.id) }}" data-confirm="Cancel this session? The other person will see it as cancelled.">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
